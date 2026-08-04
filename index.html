@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Birthday World 🎂</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/districts.css" />
+</head>
+<body>
+  <!-- persistent UI -->
+  <div id="wallet" class="wallet hidden" aria-label="heart wallet">
+    <span class="wallet-heart">❤️</span>
+    <span id="wallet-count">0</span>
+  </div>
+
+  <button id="audio-toggle" class="audio-toggle hidden" title="mute / unmute">🔊</button>
+  <button id="home-btn" class="home-btn hidden" title="back to map">🗺️</button>
+
+  <!-- confetti + toast layers -->
+  <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+  <div id="toast-layer" class="toast-layer"></div>
+  <div id="modal-layer" class="modal-layer hidden"></div>
+
+  <!-- main app -->
+  <main id="app" class="app"></main>
+
+  <!-- content (edit this!) -->
+  <script src="assets/content.js"></script>
+
+  <!-- engine -->
+  <script src="js/state.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/router.js"></script>
+
+  <!-- screens -->
+  <script src="js/boot.js"></script>
+  <script src="js/gate.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/districts/bdaycity.js"></script>
+  <script src="js/districts/gallery.js"></script>
+  <script src="js/districts/arcade.js"></script>
+  <script src="js/districts/letters.js"></script>
+  <script src="js/districts/wrapped.js"></script>
+  <script src="js/districts/store.js"></script>
+  <script src="js/finale.js"></script>
+
+  <!-- boot -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function () {
+      BdayState.load();
+      BdayRouter.start();
+    });
+  </script>
+</body>
+</html>
