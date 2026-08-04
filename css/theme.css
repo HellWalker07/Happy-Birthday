@@ -3,20 +3,20 @@
  * ========================================================================== */
 
 :root {
-  --bg:        #07070c;
-  --bg-2:      #0e0e18;
-  --ink:       #f4f4ff;
-  --muted:     #9aa0c0;
+  --bg:        #090816;
+  --bg-2:      #130a2d;
+  --ink:       #eff2ff;
+  --muted:     #9ab3d7;
 
-  --neon-pink: #ff4d8d;
-  --neon-hot:  #ff2fb0;
-  --neon-cyan: #35e0ff;
-  --neon-yellow:#ffe14d;
-  --neon-red:  #ff5a5a;
-  --neon-green:#4dffa6;
-  --neon-purple:#b06bff;
+  --neon-pink: #ff9cff;
+  --neon-hot:  #b15fff;
+  --neon-cyan: #64e6ff;
+  --neon-yellow:#7fd4ff;
+  --neon-red:  #ff88d3;
+  --neon-green:#74ffda;
+  --neon-purple:#9474ff;
 
-  --glow: 0 0 6px, 0 0 14px, 0 0 28px;
+  --glow: 0 0 10px, 0 0 24px, 0 0 44px;
   --radius: 18px;
   --font: 'Fredoka', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
@@ -27,7 +27,9 @@
 html { scroll-behavior: smooth; }
 html, body {
   height: 100%;
-  background: radial-gradient(circle at 50% -10%, #14142a 0%, var(--bg) 60%);
+  background: linear-gradient(180deg, rgba(4, 2, 10, 0.85), rgba(15, 7, 36, 0.92)),
+              url("../WhatsApp Image 2026-08-03 at 4.23.53 PM.jpeg") center/cover fixed no-repeat;
+  background-blend-mode: overlay;
   color: var(--ink);
   font-family: var(--font);
   overflow-x: hidden;
@@ -81,10 +83,10 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   font-size: 1.1rem; font-weight: 600; letter-spacing: .3px;
   padding: 14px 30px; border-radius: 999px;
   color: #fff; background: linear-gradient(135deg, var(--neon-hot), var(--neon-purple));
-  box-shadow: 0 0 18px rgba(255,47,176,.6), inset 0 0 12px rgba(255,255,255,.15);
+  box-shadow: 0 0 20px rgba(148,116,255,.55), inset 0 0 14px rgba(255,255,255,.12);
   transition: transform .12s ease, box-shadow .2s ease;
 }
-.btn:hover  { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 30px rgba(255,47,176,.9); }
+.btn:hover  { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 36px rgba(148,116,255,.9); }
 .btn:active { transform: scale(.97); }
 .btn.ghost {
   background: transparent; border: 2px solid var(--neon-cyan);
@@ -98,9 +100,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   position: fixed; right: 16px; bottom: 16px; z-index: 40;
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; border-radius: 999px;
-  background: rgba(20,10,30,.85); backdrop-filter: blur(8px);
-  border: 1.5px solid var(--neon-hot);
-  box-shadow: 0 0 18px rgba(255,47,176,.5);
+  background: rgba(10,8,20,.88); backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(100,230,255,.35);
+  box-shadow: 0 0 22px rgba(100,230,255,.35);
   font-weight: 700; font-size: 1.15rem;
 }
 .wallet-heart { filter: drop-shadow(0 0 6px var(--neon-red)); }
@@ -126,8 +128,8 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .toast-layer { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; width: 100%; }
 .toast {
   padding: 12px 22px; border-radius: 999px; font-weight: 600;
-  background: rgba(20,10,30,.92); border: 1.5px solid var(--neon-yellow);
-  box-shadow: 0 0 20px rgba(255,225,77,.4);
+  background: rgba(10,8,24,.92); border: 1.5px solid rgba(100,230,255,.4);
+  box-shadow: 0 0 20px rgba(100,230,255,.28);
   animation: toastIn .3s ease, toastOut .4s ease 2.2s forwards;
   max-width: 88vw;
 }
@@ -142,9 +144,9 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   padding: 24px; animation: fadeIn .25s ease;
 }
 .modal-card {
-  background: linear-gradient(160deg, var(--bg-2), #16091f);
-  border: 1.5px solid var(--neon-hot);
-  box-shadow: 0 0 40px rgba(255,47,176,.4);
+  background: linear-gradient(160deg, var(--bg-2), #120b2b);
+  border: 1.5px solid rgba(148,116,255,.75);
+  box-shadow: 0 0 48px rgba(148,116,255,.35);
   border-radius: var(--radius);
   padding: 30px 26px; max-width: 440px; width: 100%;
   text-align: center; animation: popIn .4s cubic-bezier(.2,1.05,.32,1);
@@ -159,7 +161,7 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 /* ---- placeholder art (when no photo provided) ---- */
 .ph {
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #241033, #10203a);
+  background: linear-gradient(135deg, #16082b, #081228);
   color: var(--muted); font-size: 2rem;
 }
 
