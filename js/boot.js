@@ -7,14 +7,18 @@ BdayRouter.register('boot', function (app) {
   const c = CONTENT.boot;
   const screen = el('.screen.boot-screen');
   
-  // Ensure AudioContext is ready & listen for first user tap to un-mute Web Audio
+  // Ensure AudioContext is ready & listen for user tap to un-mute Web Audio
   BdayAudio.ensureCtx();
+
+  const soundNotice = el('.term-sound-notice', { text: '🔊 Sound is required. Tap Start to enable sound FX' });
+
   const unlockAudio = () => {
     BdayAudio.start();
     BdayAudio.ensureCtx();
+    BdayAudio.ding();
+    soundNotice.style.opacity = '0';
+    setTimeout(() => soundNotice.remove(), 300);
   };
-  window.addEventListener('pointerdown', unlockAudio, { once: true });
-  window.addEventListener('keydown', unlockAudio, { once: true });
 
   // Terminal container with header and body
   const term = el('.terminal');
@@ -31,12 +35,13 @@ BdayRouter.register('boot', function (app) {
   const termBody = el('.term-body');
   term.appendChild(termBody);
   screen.appendChild(term);
+  screen.appendChild(soundNotice);
   app.appendChild(screen);
 
   const startBtn = el('button.btn.big.boot-start.hidden', {
     text: c.startButton,
     onclick: () => {
-      BdayAudio.start();
+      unlockAudio();
       BdayState.data.seenIntro = false;
       BdayRouter.go('gate');
     },
