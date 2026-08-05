@@ -27,9 +27,10 @@ BdayRouter.register('gallery', function (app) {
       back.appendChild(el('p', { text: '📅 ' + (p.where || 'Just now') }));
       back.appendChild(el('p', { text: p.what || 'A brand new memory.' }));
     } else {
-      back.appendChild(el('p', { html: '📍 <b>' + (p.where || '') + '</b>' }));
-      back.appendChild(el('p', { text: p.what || '' }));
-      back.appendChild(el('p.fact', { text: p.fact || '' }));
+      // `where` / `fact` are optional — the real polaroids only carry a story
+      if (p.where) back.appendChild(el('p', { html: '📍 <b>' + p.where + '</b>' }));
+      if (p.what) back.appendChild(el('p', { text: p.what }));
+      if (p.fact) back.appendChild(el('p.fact', { text: p.fact }));
     }
     inner.appendChild(front); inner.appendChild(back);
     card.appendChild(inner);
