@@ -129,7 +129,7 @@ BdayRouter.register('gallery', function (app) {
   }
 
   /* ---- netflix memories ---- */
-  screen.appendChild(el('h2.sec-title', { text: g.netflixTitle, style: 'color:#e50914;text-shadow:0 0 12px #e50914' }));
+  screen.appendChild(el('h2.sec-title', { text: g.netflixTitle, style: 'color:#e50914' }));
   const row = el('.netflix-row');
   (g.videos || []).forEach(v => {
     const tile = el('.netflix-tile');

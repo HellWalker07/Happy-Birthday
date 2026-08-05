@@ -23,11 +23,98 @@ BdayRouter.register('bdaycity', function (app) {
 
   renderIntro();
 
+  /* ---------------- TOWN SQUARE (landing collage) ---------------- */
   function renderIntro() {
     stage.innerHTML = '';
-    stage.appendChild(el('h2.neon-text', { text: 'Welcome to the town square' }));
-    stage.appendChild(el('p', { text: 'The celebration begins here.' }));
-    stage.appendChild(el('button.btn.big', { text: c.startButton, onclick: renderCake }));
+    stage.classList.add('bc-square');
+
+    stage.appendChild(el('h2.bc-title', { text: c.welcomeTitle || 'Welcome to the town square' }));
+    stage.appendChild(el('p.bc-sub', { text: (c.welcomeSub || 'The celebration begins here.') + ' 💚' }));
+
+    const cta = el('.bc-cta');
+    cta.appendChild(el('button.btn.big.sticker', {
+      text: c.startButton,
+      onclick: () => { stage.classList.remove('bc-square'); renderCake(); },
+    }));
+    cta.appendChild(el('span.bc-cta-heart',  { html: BW_DOODLE.heart() }));
+    cta.appendChild(el('span.bc-cta-smiley', { html: BW_DOODLE.smiley() }));
+    stage.appendChild(cta);
+
+    stage.appendChild(buildSquareScraps());
+  }
+
+  function buildSquareScraps() {
+    const P = c.photos || {};
+    const scraps = el('.bw-scraps');
+
+    const doodle = (kind, slot, arg) =>
+      el('span.bw-doodle.bw-float.' + slot, { html: BW_DOODLE[kind](arg) });
+
+    function photo(cfg, slot, rot, tape) {
+      if (!cfg || !cfg.src) return null;
+      const f = el('.bw-photo.' + slot + (cfg.cutout ? '.is-cutout' : ''), { style: '--rot:' + rot });
+      f.appendChild(el('img', { src: cfg.src, alt: '', loading: 'lazy' }));
+      if (!cfg.cutout) f.appendChild(el('.bw-tape', { style: tape }));
+      return f;
+    }
+    function lines(arr, mark) {
+      return (arr || []).map(t => el('div', {
+        html: (mark && t.includes(mark)) ? t.replace(mark, `<span class="hl">${mark}</span>`) : t,
+      }));
+    }
+
+    /* left: pinned pink notepad + smiley */
+    const pink = el('.bw-note.bw-note--pink.bw-note--tornb', {}, lines(c.noteLeft));
+    pink.appendChild(el('div', { text: '♥' }));
+    const pinkWrap = el('.bw-note-wrap.sl-bc-note-l', {}, pink);
+    pinkWrap.appendChild(el('span.bw-pin', { html: BW_DOODLE.pin(), style: 'top:-20px;right:16px' }));
+    scraps.appendChild(pinkWrap);
+    scraps.appendChild(doodle('smiley', 'sl-bc-smiley'));
+
+    /* left-bottom photo, with a daisy tucked in the corner */
+    const pLB = photo(P.leftBottom, 'sl-bc-photo-lb', '-4deg', 'top:-13px;left:-22px;transform:rotate(-26deg)');
+    if (pLB) {
+      pLB.appendChild(el('span.bw-doodle', { html: BW_DOODLE.daisy(), style: 'position:absolute;bottom:-10px;right:-12px;width:36px;height:36px;z-index:4' }));
+      scraps.appendChild(pLB);
+    }
+    scraps.appendChild(doodle('heart', 'sl-bc-heart-l', '#fff'));
+    scraps.appendChild(doodle('sparkle', 'sl-bc-sparkle-l'));
+
+    /* right-top photo + star */
+    const pRT = photo(P.rightTop, 'sl-bc-photo-rt', '3deg', 'top:-13px;right:-20px;transform:rotate(24deg)');
+    if (pRT) scraps.appendChild(pRT);
+    scraps.appendChild(doodle('star', 'sl-bc-star-rt'));
+
+    /* right: the clipped date note */
+    if (c.noteRight) {
+      const dn = el('.bw-note.bw-note--plain', { text: c.noteRight });
+      const dw = el('.bw-note-wrap.sl-bc-note-r', {}, dn);
+      dw.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;right:14px;transform:rotate(8deg)' }));
+      scraps.appendChild(dw);
+    }
+
+    /* right-bottom: grid-paper note + teddy */
+    if (c.noteGrid && c.noteGrid.length) {
+      const gn = el('.bw-note.bw-note--grid.bw-note--tornb', {}, lines(c.noteGrid, c.noteGridMark));
+      const gw = el('.bw-note-wrap.sl-bc-note-rb', {}, gn);
+      gw.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;left:12px;transform:rotate(-10deg)' }));
+      scraps.appendChild(gw);
+    }
+    scraps.appendChild(doodle('teddy', 'sl-bc-teddy'));
+    scraps.appendChild(doodle('heart', 'sl-bc-heart-r'));
+
+    /* loose scatter across the top and bottom */
+    scraps.appendChild(doodle('heart', 'sl-bc-heart-t'));
+    scraps.appendChild(doodle('star', 'sl-bc-star-t', '#fff'));
+    scraps.appendChild(doodle('loop', 'sl-bc-loop'));
+    scraps.appendChild(doodle('plane', 'sl-bc-plane'));
+    scraps.appendChild(doodle('star', 'sl-bc-star-tr', '#fff'));
+    scraps.appendChild(doodle('twinkle', 'sl-bc-twink-l'));
+    scraps.appendChild(doodle('twinkle', 'sl-bc-twink-r'));
+    scraps.appendChild(doodle('star', 'sl-bc-star-b', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-bc-star-br', '#fff'));
+
+    return scraps;
   }
 
   /* ---------------- CAKE ---------------- */
@@ -133,7 +220,7 @@ BdayRouter.register('bdaycity', function (app) {
     // shuffle
     for (let i = pool.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0;[pool[i], pool[j]] = [pool[j], pool[i]]; }
     let popped = 0;
-    const colors = ['#ff4d8d', '#35e0ff', '#ffe14d', '#4dffa6', '#b06bff', '#ff5a5a'];
+    const colors = ['#B84E6B', '#C08A2E', '#7E9A72', '#6B4A7A', '#7A93A8', '#E0A64A'];
 
     pool.forEach((reward, i) => {
       const b = el('.balloon');
@@ -177,7 +264,7 @@ BdayRouter.register('bdaycity', function (app) {
     } else if (r.type === 'voice') {
       box.appendChild(el('p', { text: '(add a voice note in content.js → balloons)', style: 'font-size:.8rem;color:var(--muted)' }));
     }
-    if (r.type === 'evil') box.querySelector('p').style.color = 'var(--neon-red)';
+    if (r.type === 'evil') box.querySelector('p').style.color = 'var(--rose-deep)';
     UI.modal(box, { closeText: 'Nice 👍' });
     BdayAudio.ding();
   }
