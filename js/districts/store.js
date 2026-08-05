@@ -23,6 +23,7 @@ BdayRouter.register('store', function (app) {
     const cardEl = el('.store-item');
     cardEl.appendChild(el('.store-emoji', { text: item.emoji }));
     cardEl.appendChild(el('.store-name', { text: item.name }));
+    if (item.desc) cardEl.appendChild(el('.store-desc', { text: item.desc }));
     cardEl.appendChild(el('.store-price', { text: '❤️ ' + item.price }));
     const btn = el('button.btn' + (owned ? '.ghost' : ''), {
       text: owned ? 'Owned ✓' : 'Add to cart',
