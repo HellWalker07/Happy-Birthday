@@ -106,7 +106,8 @@ BdayRouter.register('wrapped', function (app) {
   function genreCard() {
     const total = w.genre.reduce((s, g) => s + g.pct, 0) || 100;
     let acc = 0;
-    const colors = ['#1DB954', '#35e0ff', '#ffe14d', '#ff4d8d', '#b06bff'];
+    // light tints — the pie sits on the dark brass w-genre card
+    const colors = ['#9FD98A', '#7FC4D8', '#F0C44E', '#F2A9BC', '#C0A3D6'];
     const stops = w.genre.map((g, i) => {
       const from = (acc / total) * 100; acc += g.pct;
       const to = (acc / total) * 100;
@@ -127,9 +128,9 @@ BdayRouter.register('wrapped', function (app) {
       el('h2', { text: 'Our Blend' }),
       el('.wr-blend-imgs', { html: '<span>🧑</span><div class="wr-blend-score">' + b.score + '</div><span>👩</span>' }),
       el('p.wr-sub', { text: 'Compatibility Score' }),
-      el('h3', { text: 'Shared Interests', style: 'color:var(--neon-green);margin-top:10px' }),
+      el('h3', { text: 'Shared Interests', style: 'color:var(--on-dark-ok);margin-top:10px' }),
       el('ul.wr-blend-list', {}, b.shared.map(t => el('li', { text: t }))),
-      el('h3', { text: 'Needs Improvement', style: 'color:var(--neon-red);margin-top:10px' }),
+      el('h3', { text: 'Needs Improvement', style: 'color:var(--on-dark-warn);margin-top:10px' }),
       el('ul.wr-blend-list', {}, b.needsWork.map(t => el('li', { text: t }))),
     ]);
   }

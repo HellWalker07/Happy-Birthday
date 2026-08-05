@@ -47,7 +47,7 @@ BdayRouter.register('gate', function (app) {
       document.querySelector('#modal-layer .btn').onclick = () => { UI.closeModal(); BdayRouter.go('facescan'); };
     } else {
       box.appendChild(el('.gate-big', { text: '🚫' }));
-      box.appendChild(el('h2', { text: g.deniedTitle, style: 'color:var(--neon-red);text-shadow:0 0 12px var(--neon-red)' }));
+      box.appendChild(el('h2', { text: g.deniedTitle, style: 'color:var(--rose-deep)' }));
       box.appendChild(el('p', { text: g.deniedText }));
       if (g.deniedGif) box.appendChild(el('img', { src: g.deniedGif, alt: '' }));
       else box.appendChild(el('.gate-big', { text: '🤥🤥🤥', style: 'font-size:2.4rem' }));
@@ -75,8 +75,33 @@ BdayRouter.register('facescan', function (app) {
   app.appendChild(screen);
 
   let stream = null;
+
+  /* Grab the current video frame as a still. Must run BEFORE the tracks are
+   * stopped — once they are, the <video> has nothing left to paint and the
+   * frame just goes black. */
+  function capturePhoto() {
+    if (!video.isConnected || !video.videoWidth || !video.videoHeight) return null;
+    try {
+      const canvas = el('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.92);
+    } catch (e) {
+      return null;   // no frame ready yet; keep the placeholder
+    }
+  }
+
   function finish(confirmed) {
+    const shot = capturePhoto();
     if (stream) stream.getTracks().forEach(t => t.stop());
+    if (video.isConnected) {
+      video.srcObject = null;
+      // never leave a stopped <video> on screen — it paints as a black box
+      video.replaceWith(shot
+        ? el('img.scan-shot', { src: shot, alt: 'your verification photo' })
+        : el('.ph.scan-noface', { text: '🙂' }));
+    }
     BdayAudio.ding();
     frame.classList.add('scan-done');
     screen.querySelector('h2').textContent = f.resultText;

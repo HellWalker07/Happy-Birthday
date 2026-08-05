@@ -13,7 +13,7 @@ window.CONTENT = {
 
   /* -------- WHO IS THIS FOR -------- */
   him: {
-    name: "Advik",              // the birthday person's name
+    name: "Aditya",             // the birthday person's name
     petName: "Best Man",        // used in "Happy Birthday to the ___"
   },
   her: {
@@ -60,26 +60,67 @@ window.CONTENT = {
     noCamText: "Camera shy? That's okay — we know it's you.",
   },
 
-  /* -------- THE MAP -------- */
+  /* -------- THE MAP (the scrapbook page) -------- */
   map: {
     title: "BIRTHDAY WORLD",
+    tagline: "Let's celebrate!",
     walletNote: "Collect hearts on your way — spend them on gifts later.",
     nextLockedText: "Explore everything to unlock your surprise…",
     nextButton: "Next →",
-    // Order of stops on the fairy-light string
+
+    // the torn notebook note, top-left. `welcomeLead` sits just before the
+    // name, which is pulled from him.name and highlighted in marker.
+    welcomeTop: "Made with Love",
+    welcomeLead: "for",
+    // the bottom-left notepad — one line per row of the ruled paper. Whatever
+    // string is in `vibesMark` gets the highlighter swipe.
+    vibesList: ["your special being", "makes life so much", "more special"],
+    vibesMark: "more special",
+    // speech bubble next to the top-right photo
+    speechBubble: "let's gooo!",
+    // the pink sticky note, bottom-right
+    stickyNote: "made of\nsunshine,\nlaughter\nand mischief",
+
+    /* Scrapbook photos. Drop replacements in assets/img/ and rename here.
+     * `cutout: true` removes the polaroid frame so a background-removed PNG
+     * sits directly on the page — that's how the reference art looks. Give it
+     * a transparent .png and flip the flag; nothing else needs to change. */
+    photos: {
+      topRight:    { src: "assets/img/BW top right.jpeg" },
+      leftBottom:  { src: "assets/img/BW left bottom.jpeg" },
+      rightBottom: { src: "assets/img/BW right bottom.jpeg", cutout: false },
+    },
+
+    // Order of stops along the path
     districts: [
-      { id: "bdaycity", label: "Bday City" },
-      { id: "gallery",  label: "Memory Lane" },
-      { id: "arcade",   label: "Arcade District" },
-      { id: "letters",  label: "Open-When Letters" },
-      { id: "wrapped",  label: "Wrapped" },
-      { id: "store",    label: "Merch Store" },
+      { id: "bdaycity", label: "Bday City",         icon: "📍" },
+      { id: "gallery",  label: "Memory Lane",       icon: "📷" },
+      { id: "arcade",   label: "Arcade District",   icon: "🕹️" },
+      { id: "letters",  label: "Open-When Letters", icon: "💌" },
+      { id: "wrapped",  label: "Wrapped",           icon: "🎁" },
+      { id: "store",    label: "Merch Store",       icon: "🛍️" },
     ],
   },
 
   /* -------- BDAY CITY: cake + balloons -------- */
   bdaycity: {
     startButton: "Start Celebration",
+
+    /* -- the town-square landing collage -- */
+    welcomeTitle: "Welcome to the town square",
+    welcomeSub: "The celebration begins here.",
+    // pink pinned notepad, left. One string per line.
+    noteLeft: ["let the", "good times", "roll!"],
+    // small clipped note, right
+    noteRight: "06.06.2026",
+    // grid-paper note, bottom-right. `noteGridMark` gets the highlighter.
+    noteGrid: ["Aditya is", "the event.", "We're the", "audience."],
+    noteGridMark: "the event.",
+    photos: {
+      rightTop:   { src: "assets/img/BC right top.jpeg" },
+      leftBottom: { src: "assets/img/BC left bottom.jpeg" },
+    },
+
     cakeType: "Tiramisu",
     blowPrompt: "Blow into your mic to blow out the candles! (or tap the flames)",
     cakeMessage: "HAPPY BIRTHDAY TO THE BEST MAN",

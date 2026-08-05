@@ -1,25 +1,67 @@
 /* ============================================================================
- *  theme.css — neon-on-black design system + shared components
+ *  theme.css — "Vintage Parlour" design system + shared components
+ *
+ *  Palette is derived from assets/img/bg.jpeg (sage + cream striped wallpaper):
+ *  sage #BED4B0 and cream #F6EFDC are sampled straight from the image, and the
+ *  brass accent comes from the gold hairline along its top edge.
+ *
+ *  Depth is carried by tinted drop shadows, never by glow — glow is a
+ *  light-in-darkness effect and reads as smudge on a cream ground.
  * ========================================================================== */
 
 :root {
-  --bg:        #090816;
-  --bg-2:      #130a2d;
-  --ink:       #eff2ff;
-  --muted:     #9ab3d7;
+  /* ---- surfaces ---- */
+  --bg:         #F3EDE0;
+  --bg-2:       #E7DDC8;
+  --paper:      #FBF6EC;   /* cards, panels, controls */
+  --paper-2:    #F2EADA;   /* sunken wells, inset rows */
+  --paper-obj:  #FDFBF4;   /* literal paper: polaroids, letters, receipts */
 
-  --neon-pink: #ff9cff;
-  --neon-hot:  #b15fff;
-  --neon-cyan: #64e6ff;
-  --neon-yellow:#7fd4ff;
-  --neon-red:  #ff88d3;
-  --neon-green:#74ffda;
-  --neon-purple:#9474ff;
+  /* ---- ink (green-black, so text sits in the wallpaper's family) ---- */
+  --ink:        #2A3326;   /* 12.2:1 on --paper */
+  --ink-soft:   #55604F;   /*  6.2:1 — body copy */
+  --ink-faint:  #8A9384;   /*  3.2:1 — large text / captions only */
+  --muted:      #55604F;   /* legacy alias, kept so older rules stay honest */
 
-  --glow: 0 0 10px, 0 0 24px, 0 0 44px;
+  /* ---- sage, from the wallpaper ---- */
+  --sage:       #BED4B0;
+  --sage-deep:  #7E9A72;   /* borders, dividers */
+  --sage-ink:   #46583D;   /* success, "done" states */
+
+  /* ---- accents ---- */
+  --rose:       #B84E6B;   /* primary action — 4.8:1 with white */
+  --rose-deep:  #9E3E5A;   /* hover, and rose-as-text at 5.9:1 */
+  --brass:      #C08A2E;   /* borders, bulbs, prices */
+  --brass-deep: #92661C;   /* brass-as-text at 4.7:1 */
+  --plum:       #6B4A7A;   /* hearts, wallet — 6.8:1 */
+  --dusty:      #7A93A8;   /* cool relief in confetti/balloons */
+
+  /* ---- text on the deep Wrapped cards (those stay saturated) ---- */
+  --on-dark:      #ffffff;
+  --on-dark-soft: rgba(255,255,255,.85);
+  --on-dark-ok:   #A8DE96;
+  --on-dark-warn: #F2A9BC;
+
+  /* ---- elevation ---- */
+  --shadow-sm:   0 1px 2px rgba(42,51,38,.08), 0 2px 6px rgba(42,51,38,.06);
+  --shadow-md:   0 4px 12px rgba(42,51,38,.10), 0 10px 28px rgba(42,51,38,.08);
+  --shadow-lift: 0 8px 24px rgba(42,51,38,.14);
+  --ring:        0 0 0 3px rgba(184,78,107,.35);
+
   --radius: 18px;
   --font: 'Fredoka', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --display: 'Luckiest Guy', 'Fredoka', system-ui, cursive;  /* poster caps */
+  --hand: 'Caveat', 'Segoe Script', cursive;                 /* handwriting */
+
+  /* scrapbook stock */
+  --sticker-line: #2A3326;                 /* the hand-drawn outline weight */
+  --sticker-shadow: 3px 4px 0 rgba(42,51,38,.20);
+  --tape: repeating-linear-gradient(90deg, rgba(184,208,168,.82) 0 7px, rgba(214,231,203,.82) 7px 14px);
+  --hl-green: #C4E4AC;
+  --hl-yellow: #FBE79A;
+  --note-rule: rgba(122,147,168,.34);
+  --sticky-pink: #F6C7D2;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -27,9 +69,10 @@
 html { scroll-behavior: smooth; }
 html, body {
   height: 100%;
-  background: linear-gradient(180deg, rgba(4, 2, 10, 0.85), rgba(15, 7, 36, 0.92)),
-              url("../WhatsApp Image 2026-08-03 at 4.23.53 PM.jpeg") center/cover fixed no-repeat;
-  background-blend-mode: overlay;
+  /* bg-tile.png is one exact 50px stripe period cut from bg.jpeg, so it tiles
+     without a seam; the cream veil keeps the stripes from fighting body text. */
+  background: linear-gradient(rgba(251, 246, 236, 0.74), rgba(251, 246, 236, 0.74)),
+              url("../assets/img/bg-tile.png") top left repeat fixed;
   color: var(--ink);
   font-family: var(--font);
   overflow-x: hidden;
@@ -38,6 +81,7 @@ body { min-height: 100vh; overscroll-behavior: none; }
 
 .hidden { display: none !important; }
 button { font-family: var(--font); cursor: pointer; border: none; background: none; color: inherit; }
+:focus-visible { outline: none; box-shadow: var(--ring); border-radius: 8px; }
 
 .app { min-height: 100vh; width: 100%; position: relative; }
 
@@ -58,10 +102,10 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   .img-fade { filter: none; }
 }
 
-/* ---- neon helpers ---- */
-.neon-text { color: #fff; text-shadow: 0 0 6px var(--neon-pink), 0 0 16px var(--neon-pink), 0 0 30px var(--neon-hot); }
-.neon-cyan  { color: #fff; text-shadow: 0 0 6px var(--neon-cyan), 0 0 16px var(--neon-cyan); }
-.neon-yellow{ color: #fff; text-shadow: 0 0 6px var(--neon-yellow), 0 0 16px var(--neon-yellow); }
+/* ---- display-text helpers (were neon glows; now weight + colour) ---- */
+.neon-text   { color: var(--rose-deep); text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+.neon-cyan   { color: var(--sage-ink);  text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+.neon-yellow { color: var(--brass-deep); text-shadow: 0 1px 0 rgba(255,255,255,.6); }
 
 /* ---- generic screen ---- */
 .screen {
@@ -74,24 +118,25 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @keyframes softFade { from { opacity: 0; } to { opacity: 1; } }
 
-.screen h1 { font-size: clamp(1.8rem, 7vw, 3.4rem); font-weight: 700; line-height: 1.05; }
-.screen h2 { font-size: clamp(1.3rem, 5vw, 2.2rem); font-weight: 600; }
-.screen p  { color: var(--muted); font-size: clamp(1rem, 3.4vw, 1.2rem); max-width: 620px; }
+.screen h1 { font-size: clamp(1.8rem, 7vw, 3.4rem); font-weight: 700; line-height: 1.05; color: var(--ink); }
+.screen h2 { font-size: clamp(1.3rem, 5vw, 2.2rem); font-weight: 600; color: var(--ink); }
+.screen p  { color: var(--ink-soft); font-size: clamp(1rem, 3.4vw, 1.2rem); max-width: 620px; }
 
-/* ---- neon button ---- */
+/* ---- primary button ---- */
 .btn {
   font-size: 1.1rem; font-weight: 600; letter-spacing: .3px;
   padding: 14px 30px; border-radius: 999px;
-  color: #fff; background: linear-gradient(135deg, var(--neon-hot), var(--neon-purple));
-  box-shadow: 0 0 20px rgba(148,116,255,.55), inset 0 0 14px rgba(255,255,255,.12);
-  transition: transform .12s ease, box-shadow .2s ease;
+  color: #fff; background: linear-gradient(135deg, var(--rose), var(--rose-deep));
+  box-shadow: var(--shadow-md);
+  transition: transform .12s ease, box-shadow .2s ease, background .2s ease;
 }
-.btn:hover  { transform: translateY(-2px) scale(1.03); box-shadow: 0 0 36px rgba(148,116,255,.9); }
+.btn:hover  { transform: translateY(-2px) scale(1.03); box-shadow: var(--shadow-lift); }
 .btn:active { transform: scale(.97); }
 .btn.ghost {
-  background: transparent; border: 2px solid var(--neon-cyan);
-  box-shadow: 0 0 14px rgba(53,224,255,.4); color: #fff;
+  background: transparent; border: 2px solid var(--sage-deep);
+  color: var(--ink); box-shadow: none;
 }
+.btn.ghost:hover { background: rgba(190,212,176,.35); box-shadow: var(--shadow-sm); }
 .btn.big { font-size: 1.3rem; padding: 18px 42px; }
 .btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
 
@@ -100,12 +145,13 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   position: fixed; right: 16px; bottom: 16px; z-index: 40;
   display: flex; align-items: center; gap: 8px;
   padding: 10px 16px; border-radius: 999px;
-  background: rgba(10,8,20,.88); backdrop-filter: blur(10px);
-  border: 1.5px solid rgba(100,230,255,.35);
-  box-shadow: 0 0 22px rgba(100,230,255,.35);
-  font-weight: 700; font-size: 1.15rem;
+  background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+  border: 2.5px solid var(--sticker-line);
+  box-shadow: var(--sticker-shadow);
+  color: var(--sticker-line);
+  font-family: var(--hand); font-weight: 700; font-size: 1.3rem;
 }
-.wallet-heart { filter: drop-shadow(0 0 6px var(--neon-red)); }
+.wallet-heart { filter: none; }
 .wallet.bump { animation: bump .4s ease; }
 @keyframes bump { 0%,100%{transform:scale(1)} 40%{transform:scale(1.35)} }
 
@@ -113,12 +159,13 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
   position: fixed; z-index: 40; top: 14px;
   width: 46px; height: 46px; border-radius: 50%;
   font-size: 1.3rem; line-height: 46px; text-align: center;
-  background: rgba(20,10,30,.8); backdrop-filter: blur(8px);
-  border: 1.5px solid rgba(255,255,255,.2);
+  background: rgba(251,246,236,.92); backdrop-filter: blur(8px);
+  border: 1.5px solid var(--sage-deep);
+  box-shadow: var(--shadow-sm);
   transition: transform .12s ease;
 }
 .audio-toggle { right: 14px; }
-.home-btn     { left: 14px; border-color: var(--neon-cyan); box-shadow: 0 0 14px rgba(53,224,255,.4); }
+.home-btn     { left: 14px; border-color: var(--brass); }
 .audio-toggle:active, .home-btn:active { transform: scale(.9); }
 
 /* ---- confetti canvas ---- */
@@ -128,8 +175,8 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .toast-layer { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: none; width: 100%; }
 .toast {
   padding: 12px 22px; border-radius: 999px; font-weight: 600;
-  background: rgba(10,8,24,.92); border: 1.5px solid rgba(100,230,255,.4);
-  box-shadow: 0 0 20px rgba(100,230,255,.28);
+  background: rgba(251,246,236,.97); border: 1.5px solid var(--sage-deep);
+  color: var(--ink); box-shadow: var(--shadow-lift);
   animation: toastIn .3s ease, toastOut .4s ease 2.2s forwards;
   max-width: 88vw;
 }
@@ -140,34 +187,34 @@ button { font-family: var(--font); cursor: pointer; border: none; background: no
 .modal-layer {
   position: fixed; inset: 0; z-index: 80;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(3,3,10,.82); backdrop-filter: blur(6px);
+  background: rgba(42,51,38,.55); backdrop-filter: blur(6px);
   padding: 24px; animation: fadeIn .25s ease;
 }
 .modal-card {
-  background: linear-gradient(160deg, var(--bg-2), #120b2b);
-  border: 1.5px solid rgba(148,116,255,.75);
-  box-shadow: 0 0 48px rgba(148,116,255,.35);
+  background: linear-gradient(160deg, var(--paper), var(--paper-2));
+  border: 1.5px solid var(--sage-deep);
+  box-shadow: var(--shadow-lift);
   border-radius: var(--radius);
   padding: 30px 26px; max-width: 440px; width: 100%;
   text-align: center; animation: popIn .4s cubic-bezier(.2,1.05,.32,1);
   max-height: 86vh; overflow-y: auto;
 }
 @keyframes popIn { from { opacity: 0; transform: scale(.88) translateY(8px); } to { opacity: 1; transform: none; } }
-.modal-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
-.modal-card p  { color: var(--ink); white-space: pre-line; margin-bottom: 8px; }
+.modal-card h3 { font-size: 1.5rem; margin-bottom: 10px; color: var(--ink); }
+.modal-card p  { color: var(--ink-soft); white-space: pre-line; margin-bottom: 8px; }
 .modal-card img { max-width: 100%; border-radius: 12px; margin: 12px 0; }
 .modal-card .btn { margin-top: 16px; }
 
 /* ---- placeholder art (when no photo provided) ---- */
 .ph {
   display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, #16082b, #081228);
-  color: var(--muted); font-size: 2rem;
+  background: linear-gradient(135deg, var(--sage), var(--paper-2));
+  color: var(--ink-faint); font-size: 2rem;
 }
 
 /* ---- back link inside districts ---- */
 .district-head { position: sticky; top: 0; z-index: 20; width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
-.district-head .title { font-size: 1.4rem; font-weight: 700; }
+.district-head .title { font-size: 1.4rem; font-weight: 700; color: var(--ink); }
 
 @media (min-width: 780px) {
   .screen p { font-size: 1.2rem; }
