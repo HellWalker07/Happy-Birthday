@@ -9,22 +9,30 @@ BdayRouter.register('gallery', function (app) {
   screen.appendChild(districtHead('Memory Lane 📸'));
 
   /* ---- polaroid wall ---- */
-  screen.appendChild(el('h2.neon-cyan.sec-title', { text: 'The Wall' }));
-  screen.appendChild(el('p', { text: 'Tap a photo to flip it over.' }));
-  const wall = el('.polaroid-wall');
+  const stage = el('.gl-stage');
+  screen.appendChild(stage);
 
-  function addPolaroid(p, isUser) {
+  stage.appendChild(el('h2.gl-title', { text: g.wallTitle || 'The Wall' }));
+  stage.appendChild(el('.gl-tape-note', { text: (g.wallNote || 'Tap a photo to flip it over.') + ' ♡' }));
+  const wall = el('.polaroid-wall.gl-wall');
+  const mine = el('.polaroid-wall.gl-mine');   // your photobooth shot lives here
+
+  const CAP_MARKS = ['♡', '✧', '☆', '♡'];   // the little glyph after each caption
+
+  function addPolaroid(p, isUser, idx) {
     const card = el('.polaroid');
-    card.style.setProperty('--tilt', (Math.random() * 8 - 4) + 'deg');
+    card.style.setProperty('--tilt', (Math.random() * 5 - 2.5) + 'deg');
+    card.appendChild(el('span.polaroid-pin', { html: BW_DOODLE.pin() }));
     const inner = el('.polaroid-inner');
     // front
     const front = el('.polaroid-face.front');
-    front.appendChild(UI.imageOrPlaceholder(p.img, '🖼️', 'polaroid-photo'));
-    front.appendChild(el('.polaroid-caption', { text: p.caption || '♥' }));
+    front.appendChild(UI.imageOrPlaceholder(p.img, '', 'polaroid-photo'));
+    const cap = el('.polaroid-caption', { text: p.caption || '♥' });
+    if (!isUser) cap.appendChild(el('span.mark', { text: CAP_MARKS[idx % CAP_MARKS.length] }));
+    front.appendChild(cap);
     // back
     const back = el('.polaroid-face.back');
     if (isUser) {
-      back.appendChild(el('p', { text: '📅 ' + (p.where || 'Just now') }));
       back.appendChild(el('p', { text: p.what || 'A brand new memory.' }));
     } else {
       // `where` / `fact` are optional — the real polaroids only carry a story
@@ -34,21 +42,139 @@ BdayRouter.register('gallery', function (app) {
     }
     inner.appendChild(front); inner.appendChild(back);
     card.appendChild(inner);
-    card.addEventListener('click', () => { BdayAudio.pop(); card.classList.toggle('flipped'); });
-    wall.appendChild(card);
+    card.addEventListener('click', () => { BdayAudio.pop(); openLightbox(p, idx, isUser); });
+    (isUser ? mine : wall).appendChild(card);
   }
 
-  g.polaroids.forEach(p => addPolaroid(p, false));
-  BdayState.data.photos.forEach((src, i) => addPolaroid({ img: src, caption: 'Photobooth', where: 'Right here', what: 'Look at that face 🥹' }, true));
-  screen.appendChild(wall);
+  g.polaroids.forEach((p, i) => addPolaroid(p, false, i));
+  stage.appendChild(wall);
+  // your own shot gets its own row, under the four stories
+  const mineLabel = el('p.gl-mine-label', { text: 'and one of yours' });
+  stage.appendChild(mineLabel);
+  stage.appendChild(mine);
+  BdayState.data.photos.forEach((src) => addPolaroid({ img: src, caption: 'Photobooth', what: 'Look at that face' }, true, 0));
+  function syncMine() {
+    const has = mine.children.length > 0;
+    mineLabel.style.display = has ? '' : 'none';
+    mine.style.display = has ? '' : 'none';
+  }
+  syncMine();
+
+  /* ---- lightbox: the photo pops out over the page, and flips to read ---- */
+  function openLightbox(p, idx, isUser) {
+    const overlay = el('.pl-lightbox');
+    const stageEl = el('.pl-stage');
+    const box = el('.pl-box');
+    const inner = el('.pl-inner');
+
+    const front = el('.pl-face.front');
+    front.appendChild(UI.imageOrPlaceholder(p.img, '', 'pl-photo'));
+    front.appendChild(el('.pl-caption', { text: p.caption || '' }));
+
+    const back = el('.pl-face.back');
+    back.appendChild(el('h3.pl-back-title', { text: p.caption || '' }));
+    back.appendChild(el('p.pl-story', { text: p.what || '' }));
+
+    inner.appendChild(front); inner.appendChild(back);
+    box.appendChild(inner);
+    stageEl.appendChild(box);
+
+    const flipBtn = el('button.pl-flip');
+    const label = el('span', { text: 'Read the story' });
+    flipBtn.appendChild(label);
+    flipBtn.appendChild(el('span.pl-flip-arrow', { html: BW_DOODLE.flipArrow() }));
+    stageEl.appendChild(flipBtn);
+
+    overlay.appendChild(stageEl);
+    overlay.appendChild(el('button.pl-close', { text: '×', onclick: close }));
+    document.body.appendChild(overlay);
+
+    let flipped = false;
+    function flip() {
+      flipped = !flipped;
+      box.classList.toggle('flipped', flipped);
+      flipBtn.classList.toggle('is-back', flipped);
+      label.textContent = flipped ? 'Back to the photo' : 'Read the story';
+      BdayAudio.pop();
+      // reading the story pays a heart, once, keyed by caption
+      if (flipped && !isUser && BdayState.markRead('polaroid:' + (p.caption || idx))) {
+        BdayState.awardHearts(1);
+      }
+    }
+    function close() { overlay.remove(); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+
+    box.addEventListener('click', flip);
+    flipBtn.addEventListener('click', (e) => { e.stopPropagation(); flip(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+  }
 
   /* ---- photobooth ---- */
-  screen.appendChild(el('h2.neon-yellow.sec-title', { text: g.photoboothTitle }));
-  screen.appendChild(el('p', { text: g.photoboothNote }));
+  const boothWrap = el('.gl-booth');
+  boothWrap.appendChild(el('h2.gl-title', { text: g.photoboothTitle + ' ♡' }));
+  boothWrap.appendChild(el('.gl-tape-note', { text: g.photoboothNote }));
   const booth = el('.photobooth');
-  const boothBtn = el('button.btn', { text: '📷 Open camera', onclick: openBooth });
-  booth.appendChild(boothBtn);
-  screen.appendChild(booth);
+  const btnWrap = el('.gl-booth-btn');
+  const boothBtn = el('button.btn.big.sticker', { text: g.boothButton || 'Open camera', onclick: openBooth });
+  btnWrap.appendChild(boothBtn);
+  btnWrap.appendChild(el('span.gl-booth-daisy', { html: BW_DOODLE.daisy() }));
+  booth.appendChild(btnWrap);
+  boothWrap.appendChild(booth);
+  stage.appendChild(boothWrap);
+
+  /* the booth is a one-shot: once a photo is on the wall, it closes for good */
+  function boothDone() {
+    booth.innerHTML = '';
+    booth.appendChild(el('p.booth-done', { text: 'Your photo is up on the wall.' }));
+  }
+  if (BdayState.data.photos.length) boothDone();
+
+  stage.appendChild(buildWallScraps());
+
+  function buildWallScraps() {
+    const scraps = el('.bw-scraps');
+    const doodle = (kind, slot, arg) =>
+      el('span.bw-doodle.bw-float.' + slot, { html: BW_DOODLE[kind](arg) });
+    const lines = arr => (arr || []).map(t => el('div', { text: t }));
+
+    /* left note — cream, paperclip */
+    if (g.wallNoteLeft) {
+      const n = el('.bw-note.bw-note--tornb', {}, lines(g.wallNoteLeft));
+      n.appendChild(el('div', { text: '♡' }));
+      const w = el('.bw-note-wrap.sl-gl-note-l', {}, n);
+      w.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;left:10px;transform:rotate(-10deg)' }));
+      scraps.appendChild(w);
+    }
+    /* right note — sage stock, pinned */
+    if (g.wallNoteRight) {
+      const n = el('.bw-note.bw-note--grid.bw-note--tornb', {}, lines(g.wallNoteRight));
+      n.appendChild(el('div', { text: '♡' }));
+      const w = el('.bw-note-wrap.sl-gl-note-r', {}, n);
+      w.appendChild(el('span.bw-pin', { html: BW_DOODLE.pin(), style: 'top:-20px;right:14px' }));
+      scraps.appendChild(w);
+    }
+    /* pinned polaroid, top-right */
+    if (g.wallPhoto) {
+      const f = el('.bw-photo.sl-gl-photo-rt', { style: '--rot:3deg' });
+      f.appendChild(el('img', { src: g.wallPhoto, alt: '', loading: 'lazy' }));
+      f.appendChild(el('.bw-tape', { style: 'top:-12px;right:-16px;transform:rotate(20deg)' }));
+      f.appendChild(el('span.bw-doodle', { html: BW_DOODLE.smiley(), style: 'position:absolute;bottom:-14px;right:-12px;width:40px;height:40px;z-index:4' }));
+      scraps.appendChild(f);
+    }
+
+    scraps.appendChild(doodle('daisyFace', 'sl-gl-daisy'));
+    scraps.appendChild(doodle('shootStar', 'sl-gl-shoot'));
+    scraps.appendChild(doodle('trail', 'sl-gl-trail'));
+    scraps.appendChild(doodle('plane', 'sl-gl-plane'));
+    scraps.appendChild(doodle('heart', 'sl-gl-heart1', '#A9C998'));
+    scraps.appendChild(doodle('heart', 'sl-gl-heart2', '#C9DFB6'));
+    scraps.appendChild(doodle('heart', 'sl-gl-heart3', '#A9C998'));
+    scraps.appendChild(doodle('heart', 'sl-gl-heart4', '#fff'));
+    scraps.appendChild(doodle('sparkle', 'sl-gl-spark1'));
+    scraps.appendChild(doodle('sparkle', 'sl-gl-spark2'));
+    return scraps;
+  }
 
   function openBooth() {
     booth.innerHTML = '';
@@ -106,53 +232,23 @@ BdayRouter.register('gallery', function (app) {
     function showUpload() {
       booth.innerHTML = '';
       booth.appendChild(el('p', { text: 'Camera unavailable — upload a selfie instead:' }));
-      const b = el('button.btn', { text: '⬆️ Choose photo', onclick: () => upload.click() });
+      const b = el('button.btn.sticker', { text: 'Choose photo', onclick: () => upload.click() });
       booth.appendChild(upload); booth.appendChild(b);
     }
 
     function savePhoto(url) {
       BdayState.addPhoto(url);
-      addPolaroid({ img: url, caption: 'Photobooth', where: 'Right here', what: 'Look at that face 🥹' }, true);
-      wall.scrollIntoView({ behavior: 'smooth' });
+      addPolaroid({ img: url, caption: 'Photobooth', what: 'Look at that face' }, true, 0);
+      syncMine();
+      mine.scrollIntoView({ behavior: 'smooth', block: 'center' });
       UI.confetti({ count: 60 });
-      if (!BdayState.isComplete('gallery')) {
-        BdayState.markComplete('gallery');
-        BdayAudio.ding();
-        BdayState.awardHearts(1);
-        UI.toast('Photo added! Memory Lane complete 📸');
-      } else {
-        BdayAudio.ding();
-        UI.toast('Added to the wall!');
-      }
-      booth.innerHTML = '';
-      booth.appendChild(el('button.btn', { text: '📷 Take another', onclick: openBooth }));
+      // no heart for the photo itself — only reading the stories pays out
+      if (!BdayState.isComplete('gallery')) BdayState.markComplete('gallery');
+      BdayAudio.ding();
+      UI.toast('Photo added to the wall!');
+      boothDone();   // one shot only
     }
   }
 
-  /* ---- netflix memories ---- */
-  screen.appendChild(el('h2.sec-title', { text: g.netflixTitle, style: 'color:#e50914' }));
-  const row = el('.netflix-row');
-  (g.videos || []).forEach(v => {
-    const tile = el('.netflix-tile');
-    if (v.thumb) tile.appendChild(el('img', { src: v.thumb }));
-    else tile.appendChild(el('.ph', { text: '▶️', style: 'height:100%' }));
-    tile.appendChild(el('.netflix-label', { text: v.title }));
-    tile.addEventListener('click', () => playVideo(v));
-    row.appendChild(tile);
-  });
-  screen.appendChild(row);
   app.appendChild(screen);
-
-  function playVideo(v) {
-    const box = el('.video-modal');
-    if (v.src) {
-      const vid = el('video', { src: v.src, controls: '', autoplay: '', style: 'width:100%;border-radius:12px' });
-      box.appendChild(vid);
-    } else {
-      box.appendChild(el('.ph', { text: '🎬', style: 'height:200px;border-radius:12px' }));
-      box.appendChild(el('p', { text: 'Add your video in content.js → gallery.videos', style: 'color:var(--muted)' }));
-    }
-    box.appendChild(el('h3', { text: v.title }));
-    UI.modal(box);
-  }
 });

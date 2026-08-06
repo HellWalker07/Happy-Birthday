@@ -12,6 +12,18 @@ BdayRouter.register('store', function (app) {
 
   const cart = [];
 
+  /* a heart on the house, the first time the store is opened */
+  if (BdayState.claim('store:gift', 1)) {
+    setTimeout(() => {
+      const box = el('.store-gift');
+      box.appendChild(el('span.store-gift-heart', { html: BW_DOODLE.heart() }));
+      box.appendChild(el('p.store-gift-text', { text: s.giftText || 'Cause I love You' }));
+      UI.modal(box, { closeText: 'Aww' });
+      BdayState.awardHearts(1);
+      BdayAudio.cha();
+    }, 450);
+  }
+
   screen.appendChild(el('.store-wallet', {}, [
     el('span.store-wallet-amt', { html: '❤️ <b id="store-hearts">' + BdayState.data.hearts + '</b> Birthday Heart Stamps' }),
     el('p', { text: s.walletNote, style: 'font-size:.85rem' }),

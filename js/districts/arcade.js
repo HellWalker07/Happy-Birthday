@@ -12,12 +12,13 @@ BdayRouter.register('arcade', function (app) {
   screen.appendChild(wrap);
   app.appendChild(screen);
 
-  const games = { hats: false, diff: false, escape: false };
+  // `diff` (Spot 8 Differences) is parked — see the commented block below.
+  const games = { hats: false, escape: false };
   function checkDone() {
-    if (games.hats && games.diff && games.escape && !BdayState.isComplete('arcade')) {
+    if (games.hats && games.escape && !BdayState.isComplete('arcade')) {
       BdayState.markComplete('arcade');
       UI.confetti();
-      UI.toast('Arcade cleared! 🏆');
+      UI.toast('Arcade cleared!');
     }
   }
 
@@ -25,27 +26,79 @@ BdayRouter.register('arcade', function (app) {
 
   function renderMenu() {
     wrap.innerHTML = '';
-    wrap.appendChild(el('h2.neon-cyan', { text: 'Pick a game' }));
-    const grid = el('.arcade-menu');
+    wrap.classList.add('ar-menu');
+
+    const banner = el('.ar-banner', { text: a.pickTitle || 'PICK A GAME' });
+    banner.appendChild(el('.ar-banner-tape'));
+    wrap.appendChild(banner);
+    wrap.appendChild(el('.ar-sub', { text: '✦ ' + (a.pickSub || 'choose your adventure!') + ' ✦' }));
+
+    const cards = el('.ar-cards');
     [
-      { id: 'hats', label: '🎩 Find 6 Hats', done: games.hats, go: gameHats },
-      { id: 'diff', label: '🔍 Spot 8 Differences', done: games.diff, go: gameDiff },
-      { id: 'escape', label: '🚪 Escape Room', done: games.escape, go: gameEscape },
-    ].forEach(gm => {
-      const card = el('.arcade-card' + (gm.done ? '.done' : ''), { onclick: () => { BdayAudio.whoosh(); gm.go(); } });
-      card.appendChild(el('.arcade-emoji', { text: gm.label.split(' ')[0] }));
-      card.appendChild(el('.arcade-name', { text: gm.label.replace(/^\S+\s/, '') }));
-      card.appendChild(el('.arcade-badge', { text: gm.done ? '✓ done' : 'play' }));
-      grid.appendChild(card);
+      { id: 'hats',   icon: 'tophat', name: 'Find 6 Hats',  sticker: 'heart', go: gameHats },
+      // { id: 'diff', icon: 'magnifier', name: 'Spot 8 Differences', sticker: 'star', go: gameDiff },
+      { id: 'escape', icon: 'door',   name: 'Escape Room',  sticker: 'heart', go: gameEscape },
+    ].forEach((gm, i) => {
+      const card = el('.ar-card' + (games[gm.id] ? '.done' : ''), {
+        onclick: () => { BdayAudio.whoosh(); gm.go(); },
+      });
+      const tile = el('.ar-tile');
+      tile.appendChild(el('span', { html: BW_DOODLE[gm.icon]() }));
+      card.appendChild(tile);
+      card.appendChild(el('.ar-name', { text: gm.name }));
+      card.appendChild(el('.ar-rule'));
+      card.appendChild(el('.ar-play', { text: games[gm.id] ? 'done ✓' : 'play' }));
+      card.appendChild(el('span.ar-card-sticker', { html: BW_DOODLE[gm.sticker]() }));
+      card.appendChild(el('span.ar-card-pin', { html: BW_DOODLE.pin() }));
+      cards.appendChild(card);
     });
-    wrap.appendChild(grid);
+    wrap.appendChild(cards);
+    wrap.appendChild(buildMenuScraps());
   }
 
-  function award(which, msg) {
+  function buildMenuScraps() {
+    const scraps = el('.bw-scraps');
+    const doodle = (kind, slot, arg) =>
+      el('span.bw-doodle.bw-float.' + slot, { html: BW_DOODLE[kind](arg) });
+    const lines = arr => (arr || []).map(t => el('div', { text: t }));
+
+    if (a.warnNote) {
+      const n = el('.bw-note.bw-note--tornb', {}, lines(a.warnNote));
+      const w = el('.bw-note-wrap.sl-ar-warn', {}, n);
+      w.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;left:12px;transform:rotate(-8deg)' }));
+      scraps.appendChild(w);
+    }
+    if (a.goodNote) {
+      const n = el('.bw-note.bw-note--grid.bw-note--tornb', {}, lines(a.goodNote));
+      n.appendChild(el('div', { text: '♡' }));
+      scraps.appendChild(el('.bw-note-wrap.sl-ar-good', {}, n));
+      scraps.appendChild(doodle('smiley', 'sl-ar-smiley'));
+    }
+    if (a.fairNote) {
+      const n = el('.bw-note.bw-note--plain', {}, lines(a.fairNote));
+      scraps.appendChild(el('.bw-note-wrap.sl-ar-fair', {}, n));
+    }
+    scraps.appendChild(doodle('daisyFace', 'sl-ar-flower'));
+    scraps.appendChild(el('span.bw-doodle.bw-float.sl-ar-clip', { html: BW_DOODLE.clip() }));
+    scraps.appendChild(doodle('arcadeCab', 'sl-ar-cab'));
+    scraps.appendChild(doodle('star', 'sl-ar-star1', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-ar-star2', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-ar-star3', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-ar-star4', '#F6E27E'));
+    scraps.appendChild(doodle('heart', 'sl-ar-heart1', '#fff'));
+    scraps.appendChild(doodle('sparkle', 'sl-ar-spark1'));
+    scraps.appendChild(doodle('sparkle', 'sl-ar-spark2'));
+    return scraps;
+  }
+
+  /* `hearts` defaults to 1; pass 0 for games that already paid out per-find */
+  function award(which, msg, hearts) {
     if (!games[which]) {
       games[which] = true;
       BdayAudio.cha();
-      BdayState.awardHearts(1);
+      const n = hearts === undefined ? 1 : hearts;
+      // capped + persisted, so replaying a game can't mint more hearts
+      if (n > 0 && BdayState.claim('arcade:' + which, n)) BdayState.awardHearts(n);
       UI.toast(msg);
       checkDone();
     }
@@ -54,21 +107,23 @@ BdayRouter.register('arcade', function (app) {
   /* ---------- FIND 6 HATS ---------- */
   function gameHats() {
     wrap.innerHTML = '';
+    wrap.classList.remove('ar-menu');
     wrap.appendChild(backRow(renderMenu));
-    wrap.appendChild(el('p', { text: a.hats.prompt }));
-    const counter = el('h2.neon-yellow', { text: `0 / ${a.hats.count}` });
+    wrap.appendChild(el('.hat-title', { text: '✧ ' + (a.hatsTitle || 'Find the 6 Birthday Hats') }));
+    wrap.appendChild(el('.hat-sub', { text: a.hatsSub || "They're hiding… can you spot them all?" }));
+    const counter = el('.hat-count', { text: `0 / ${a.hats.count}` });
     wrap.appendChild(counter);
 
     const room = el('.hat-room');
-    // clutter emojis as camouflage
-    const clutter = ['🪑', '📦', '🎈', '🛋️', '🪴', '📚', '🧸', '🖼️', '☕', '🎸', '🕰️', '🎨', '📺', '🧦', '🪄', '🎁'];
-    for (let i = 0; i < 34; i++) {
+    // the room illustration is already busy, so only a few extra decoys
+    const clutter = ['🎈', '🎀', '⭐', '🍬', '🎐'];
+    for (let i = 0; i < 10; i++) {
       const d = el('.hat-decoy', { text: clutter[(Math.random() * clutter.length) | 0] });
       place(d); room.appendChild(d);
     }
     let found = 0;
     for (let i = 0; i < a.hats.count; i++) {
-      const hat = el('.hat', { text: '🎩' });
+      const hat = el('span.hat', { html: BW_DOODLE.tophat(true) });   // camouflaged
       place(hat);
       hat.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -77,16 +132,19 @@ BdayRouter.register('arcade', function (app) {
         BdayAudio.pop();
         found++;
         counter.textContent = `${found} / ${a.hats.count}`;
+        // a heart per hat, but only up to `count` ever — replays pay nothing
+        if (BdayState.claim('arcade:hats', a.hats.count)) BdayState.awardHearts(1);
         const r = hat.getBoundingClientRect();
         UI.confetti({ count: 16, x: r.left + 10, y: r.top + 10 });
         if (found >= a.hats.count) {
-          award('hats', 'All hats found! +1 ❤️');
-          setTimeout(renderMenu, 900);
+          award('hats', 'All hats found!', 0);   // …and nothing extra for finishing
+          setTimeout(renderMenu, 1100);
         }
       });
       room.appendChild(hat);
     }
     wrap.appendChild(room);
+    wrap.appendChild(el('.hat-tip', { text: a.hatsTip || 'pro tip: they love to blend in!' }));
 
     function place(node) {
       node.style.left = (3 + Math.random() * 90) + '%';
@@ -95,7 +153,11 @@ BdayRouter.register('arcade', function (app) {
     }
   }
 
-  /* ---------- SPOT 8 DIFFERENCES ---------- */
+  /* ---------- SPOT 8 DIFFERENCES — parked, may come back ----------
+   * Removed from the menu for now. To restore: un-comment this whole block,
+   * add `diff: false` back to `games`, put `diff` back in checkDone(), and
+   * un-comment the menu entry in renderMenu().
+
   function gameDiff() {
     wrap.innerHTML = '';
     wrap.appendChild(backRow(renderMenu));
@@ -134,68 +196,144 @@ BdayRouter.register('arcade', function (app) {
     wrap.appendChild(el('p', { text: '(Tip: differences are marked as clickable spots — add your two photos in content.js)', style: 'font-size:.8rem;color:var(--muted)' }));
   }
 
+  * ---------- end of parked block ---------- */
+
   /* ---------- ESCAPE ROOM ---------- */
   function gameEscape() {
     wrap.innerHTML = '';
+    wrap.classList.remove('ar-menu');
     wrap.appendChild(backRow(renderMenu));
-    wrap.appendChild(el('p', { text: a.escape.prompt }));
+
     const riddles = a.escape.riddles;
     let solved = 0;
-    const counter = el('h2.neon-yellow', { text: `Clues: 0 / ${riddles.length}` });
-    wrap.appendChild(counter);
 
+    const head = el('.esc-head');
+    const banner = el('.esc-banner');
+    banner.appendChild(el('.small', { text: a.escTitleTop || 'Escape the' }));
+    banner.appendChild(el('.big', { text: a.escTitleMain || 'BIRTHDAY ROOM' }));
+    banner.appendChild(el('.bw-tape', { style: 'top:-12px;left:-24px;transform:rotate(-22deg)' }));
+    head.appendChild(banner);
+    head.appendChild(el('.esc-solve', { text: '✧ ' + (a.escSolveLine || 'Solve 3 riddles to escape!') + ' ✧' }));
+    const counter = el('.esc-count', { text: `Clues: 0 / ${riddles.length}` });
+    head.appendChild(counter);
+    wrap.appendChild(head);
+
+    /* the three drawer fronts — they mirror the riddles below */
     const drawers = el('.escape-drawers');
-    riddles.forEach((rd, i) => {
+    const drawerEls = riddles.map((rd, i) => {
       const drawer = el('.drawer');
-      drawer.appendChild(el('.drawer-face', { text: '🗄️ Drawer ' + (i + 1) }));
-      drawer.addEventListener('click', () => {
-        if (drawer.classList.contains('solved')) return;
-        openRiddle(rd, drawer);
-      });
+      const lock = el('span.esc-lock', { html: BW_DOODLE.padlock(false) });
+      drawer.appendChild(lock);
+      drawer.appendChild(el('.esc-label', { text: 'Drawer ' + (i + 1) }));
+      drawer.appendChild(el('.esc-tape'));
+      drawer.appendChild(el('span.esc-sticker', { html: BW_DOODLE[i === 1 ? 'heart' : 'star'](i === 1 ? '#A9C998' : '#F6E27E') }));
       drawers.appendChild(drawer);
+      return { drawer, lock };
     });
     wrap.appendChild(drawers);
 
-    function openRiddle(rd, drawer) {
-      const box = el('.riddle-box');
-      box.appendChild(el('h3', { text: '🔑 Riddle' }));
-      box.appendChild(el('p', { text: rd.q }));
-      const input = el('input.riddle-input', { type: 'text', placeholder: 'your answer…' });
-      box.appendChild(input);
-      const feedback = el('p.riddle-feedback');
-      box.appendChild(feedback);
-      const submit = el('button.btn', {
-        text: 'Unlock', onclick: () => {
-          const val = (input.value || '').trim().toLowerCase();
-          if (val === rd.a.toLowerCase() || val.includes(rd.a.toLowerCase())) {
-            BdayAudio.ding();
-            drawer.classList.add('solved');
-            drawer.querySelector('.drawer-face').textContent = '✅ Solved';
-            solved++;
-            counter.textContent = `Clues: ${solved} / ${riddles.length}`;
+    wrap.appendChild(el('.esc-hint', { text: a.escHint || 'tap a drawer to read its riddle' }));
+
+    /* each drawer opens its riddle in a pop-up */
+    drawerEls.forEach((d, i) => {
+      d.drawer.addEventListener('click', () => {
+        if (d.drawer.classList.contains('solved')) return;
+        BdayAudio.whoosh();
+        openRiddle(riddles[i], i);
+      });
+    });
+
+    function openRiddle(rd, i) {
+      const noteWrap = el('.esc-note-wrap.esc-modal');
+      const note = el('.esc-note');
+      note.appendChild(el('.esc-scroll', {}, el('.esc-q', { text: rd.q })));
+      note.appendChild(el('.esc-ask', { text: a.escAsk || 'What is it?' }));
+
+      const row = el('.esc-row');
+      const input = el('input.esc-input', { type: 'text', placeholder: 'your answer…' });
+      const go = el('button.esc-go', { text: 'Unlock' });
+      row.appendChild(input); row.appendChild(go);
+      note.appendChild(row);
+      const feedback = el('.esc-feedback');
+      note.appendChild(feedback);
+      noteWrap.appendChild(note);
+      // badge + pin sit on the wrapper so the torn clip-path can't crop them
+      noteWrap.appendChild(el('.esc-num', { text: String(i + 1) }));
+      noteWrap.appendChild(el('span.esc-note-pin', { html: BW_DOODLE.pin() }));
+
+      function attempt() {
+        const val = (input.value || '').trim().toLowerCase();
+        const ans = rd.a.toLowerCase();
+        if (val && (val === ans || val.includes(ans) || ans.includes(val))) {
+          BdayAudio.ding();
+          input.disabled = true; go.disabled = true;
+          feedback.classList.add('ok');
+          feedback.textContent = 'Unlocked!';
+          drawerEls[i].drawer.classList.add('solved');
+          drawerEls[i].lock.innerHTML = BW_DOODLE.padlock(true);
+          solved++;
+          counter.textContent = `Clues: ${solved} / ${riddles.length}`;
+          setTimeout(() => {
             UI.closeModal();
             if (solved >= riddles.length) {
               setTimeout(() => {
                 const done = el('.escape-done');
-                done.appendChild(el('.gate-big', { text: '🎂' }));
-                done.appendChild(el('h2.neon-text', { text: a.escape.solvedText }));
+                done.appendChild(el('span', { html: BW_DOODLE.key(), style: 'display:block;width:52px;height:110px;margin:0 auto 10px' }));
+                done.appendChild(el('h2', { text: a.escape.solvedText, style: 'color:#4F7C3C' }));
                 UI.modal(done, { closeText: 'Yesss' });
-                award('escape', 'Escaped! +1 ❤️');
-                setTimeout(renderMenu, 500);
-              }, 300);
+                award('escape', 'Escaped!');
+                setTimeout(renderMenu, 600);
+              }, 350);
             }
-          } else {
-            BdayAudio.buzz();
-            feedback.textContent = 'Not quite… try again 🤔';
-            input.classList.add('shake');
-            setTimeout(() => input.classList.remove('shake'), 400);
-          }
+          }, 700);
+        } else {
+          BdayAudio.buzz();
+          feedback.classList.remove('ok');
+          feedback.textContent = 'Not quite… try again';
+          input.classList.add('shake');
+          setTimeout(() => input.classList.remove('shake'), 400);
         }
-      });
-      box.appendChild(submit);
-      UI.modal(box, { closeText: 'Later' });
-      setTimeout(() => input.focus(), 100);
+      }
+      go.addEventListener('click', attempt);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+
+      UI.modal(noteWrap, { closeText: 'Later' });
+      setTimeout(() => input.focus(), 120);
     }
+
+    wrap.appendChild(el('.esc-footer', { text: a.escFooter || 'think together, laugh louder, escape faster!' }));
+    wrap.appendChild(buildEscapeScraps());
+  }
+
+  function buildEscapeScraps() {
+    const scraps = el('.bw-scraps');
+    const doodle = (kind, slot, arg) =>
+      el('span.bw-doodle.bw-float.' + slot, { html: BW_DOODLE[kind](arg) });
+    const lines = arr => (arr || []).map(t => el('div', { text: t }));
+
+    if (a.escNote1) {
+      const n = el('.bw-note.bw-note--grid.bw-note--tornb', {}, lines(a.escNote1));
+      n.appendChild(el('div', { text: '♡' }));
+      const w = el('.bw-note-wrap.sl-es-note1', {}, n);
+      w.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;right:16px;transform:rotate(8deg)' }));
+      scraps.appendChild(w);
+    }
+    if (a.escNote2) {
+      const n = el('.bw-note.bw-note--plain', {}, lines(a.escNote2));
+      n.appendChild(el('div', { text: '♡' }));
+      const w = el('.bw-note-wrap.sl-es-note2', {}, n);
+      w.appendChild(el('.bw-tape', { style: 'top:-12px;left:22px;transform:rotate(-12deg)' }));
+      scraps.appendChild(w);
+    }
+    scraps.appendChild(doodle('key', 'sl-es-key'));
+    scraps.appendChild(doodle('padlock', 'sl-es-lock'));
+    scraps.appendChild(doodle('cake', 'sl-es-cake'));
+    scraps.appendChild(doodle('heart', 'sl-es-heart1', '#A9C998'));
+    scraps.appendChild(doodle('heart', 'sl-es-heart2', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-es-star1', '#fff'));
+    scraps.appendChild(doodle('sparkle', 'sl-es-spark1'));
+    scraps.appendChild(doodle('sparkle', 'sl-es-spark2'));
+    return scraps;
   }
 
   function backRow(fn) {

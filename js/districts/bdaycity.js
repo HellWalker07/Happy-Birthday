@@ -195,15 +195,105 @@ BdayRouter.register('bdaycity', function (app) {
     BdayAudio.tune();
     UI.confetti({ count: 180 });
     cake.classList.add('explode');
-    setTimeout(() => {
-      stage.innerHTML = '';
-      stage.appendChild(el('.sprinkle-burst', { text: '🎂✨🎉' }));
-      stage.appendChild(el('h1.neon-text.cake-msg', { text: c.cakeMessage }));
-      const btn = el('button.btn.big', { text: 'Play a game 🎈', onclick: renderBalloons });
-      stage.appendChild(btn);
-      prog.cake = true;
-      maybeComplete();
-    }, 900);
+    // one heart for blowing the candles out, once ever
+    if (BdayState.claim('bdaycity:candles', 1)) BdayState.awardHearts(1);
+    setTimeout(renderBanner, 900);
+  }
+
+  /* ------- candles out -> "Play a game" (the banner collage) ------- */
+  function renderBanner() {
+    stage.innerHTML = '';
+    stage.classList.add('bc-square');
+
+    const banner = el('.bc-banner');
+    banner.appendChild(el('.bc-banner-top', { text: c.cakeBannerTop || 'HAPPY BIRTHDAY' }));
+    const sub = el('.bc-banner-sub');
+    sub.appendChild(el('span.tick', { text: '≥' }));
+    sub.appendChild(el('span', { text: c.cakeBannerSub || 'TO MY LOVE' }));
+    sub.appendChild(el('span.tick', { text: '≤' }));
+    banner.appendChild(sub);
+    banner.appendChild(el('.bw-tape', { style: 'top:-12px;left:-26px;transform:rotate(-26deg)' }));
+    banner.appendChild(el('span.bc-banner-heart', { html: BW_DOODLE.heart('#fff') }));
+    banner.appendChild(el('span.bc-banner-daisy', { html: BW_DOODLE.daisy() }));
+    stage.appendChild(banner);
+
+    const play = el('.bc-play');
+    play.appendChild(el('button.btn.big.sticker', {
+      text: c.playButton || 'Play a game',
+      onclick: () => { stage.classList.remove('bc-square'); renderBalloons(); },
+    }));
+    play.appendChild(el('span.bc-play-heart', { html: BW_DOODLE.heart() }));
+    stage.appendChild(play);
+
+    stage.appendChild(buildBannerScraps());
+    prog.cake = true;
+    maybeComplete();
+  }
+
+  function buildBannerScraps() {
+    const P = c.photos || {};
+    const scraps = el('.bw-scraps');
+    const doodle = (kind, slot, arg) =>
+      el('span.bw-doodle.bw-float.' + slot, { html: BW_DOODLE[kind](arg) });
+    function photo(cfg, slot, rot, tape) {
+      if (!cfg || !cfg.src) return null;
+      const f = el('.bw-photo.' + slot, { style: '--rot:' + rot });
+      f.appendChild(el('img', { src: cfg.src, alt: '', loading: 'lazy' }));
+      f.appendChild(el('.bw-tape', { style: tape }));
+      return f;
+    }
+    const lines = arr => (arr || []).map(t => el('div', { text: t }));
+
+    /* the row of stickers sitting on top of the banner */
+    scraps.appendChild(doodle('heart', 'sl-pg-heart-t'));
+    scraps.appendChild(doodle('cake', 'sl-pg-cake'));
+    scraps.appendChild(doodle('gift', 'sl-pg-gift'));
+    scraps.appendChild(doodle('heart', 'sl-pg-heartsm', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-pg-star-t', '#fff'));
+
+    /* left: ruled note + smiley + photo */
+    const note = el('.bw-note', {}, lines(c.notePlay));
+    note.appendChild(el('div', { text: '♥' }));
+    const nw = el('.bw-note-wrap.sl-pg-note-l', {}, note);
+    nw.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;left:14px;transform:rotate(-8deg)' }));
+    scraps.appendChild(nw);
+    scraps.appendChild(doodle('star', 'sl-pg-star-l', '#9CC77F'));
+    scraps.appendChild(doodle('smiley', 'sl-pg-smiley'));
+
+    const pLB = photo(P.leftBottom, 'sl-pg-photo-lb', '-4deg', 'top:-12px;left:-20px;transform:rotate(-24deg)');
+    if (pLB) {
+      pLB.appendChild(el('span.bw-doodle', { html: BW_DOODLE.daisy(), style: 'position:absolute;bottom:-12px;right:-10px;width:38px;height:38px;z-index:4' }));
+      scraps.appendChild(pLB);
+    }
+    scraps.appendChild(doodle('heart', 'sl-pg-heart-lb', '#fff'));
+    scraps.appendChild(doodle('star', 'sl-pg-star-lb', '#fff'));
+
+    /* right: photo, pink sticky, teddy, grid note */
+    const pRT = photo(P.rightTop, 'sl-pg-photo-rt', '4deg', 'top:-12px;right:-18px;transform:rotate(22deg)');
+    if (pRT) scraps.appendChild(pRT);
+    scraps.appendChild(doodle('heart', 'sl-pg-heart-rt'));
+    scraps.appendChild(doodle('star', 'sl-pg-star-rt', '#9CC77F'));
+
+    if (c.stickyPlay) {
+      const sticky = el('.bw-sticky.sl-pg-sticky', { text: c.stickyPlay + '\n♥', style: '--rot:2deg' });
+      sticky.appendChild(el('span.bw-clip', { html: BW_DOODLE.clip(), style: 'top:-16px;left:16px;transform:rotate(-6deg)' }));
+      scraps.appendChild(sticky);
+    }
+    scraps.appendChild(doodle('star', 'sl-pg-star-rb', '#9CC77F'));
+    scraps.appendChild(doodle('teddy', 'sl-pg-teddy'));
+
+    if (c.gridPlay && c.gridPlay.length) {
+      const g = el('.bw-note.bw-note--grid.bw-note--tornb', {}, lines(c.gridPlay));
+      g.appendChild(el('div', { text: '♥' }));
+      const gw = el('.bw-note-wrap.sl-pg-grid', {}, g);
+      gw.appendChild(el('.bw-tape', { style: 'top:-12px;left:22px;transform:rotate(-14deg)' }));
+      scraps.appendChild(gw);
+    }
+    scraps.appendChild(doodle('heart', 'sl-pg-heart-br'));
+
+    scraps.appendChild(doodle('star', 'sl-pg-star-b', '#fff'));
+    scraps.appendChild(doodle('sparkle', 'sl-pg-sparkle'));
+    return scraps;
   }
 
   /* ---------------- BALLOON POP ---------------- */
@@ -237,13 +327,17 @@ BdayRouter.register('bdaycity', function (app) {
         const r = b.getBoundingClientRect();
         UI.confetti({ count: 24, x: r.left + r.width / 2, y: r.top + r.height / 2 });
         popped++;
+        // Every balloon is worth a heart, capped at the number of balloons so
+        // replaying can't mint more. Silent, because the reward pop-up says so
+        // — a toast per pop would stack ten deep behind the modal.
+        if (BdayState.claim('bdaycity:balloons', pool.length)) BdayState.awardHearts(1, true);
         counter.textContent = `Popped ${popped} / ${pool.length}`;
         setTimeout(() => b.remove(), 200);
         revealReward(reward);
         if (popped >= pool.length) {
           prog.balloons = true;
           maybeComplete();
-          setTimeout(() => UI.toast('All popped! 🎈'), 400);
+          setTimeout(() => UI.toast('All popped!'), 400);
         }
       });
       field.appendChild(b);
@@ -252,20 +346,16 @@ BdayRouter.register('bdaycity', function (app) {
   }
 
   function revealReward(r) {
-    if (r.type === 'heart') { BdayState.awardHearts(1); return; }
     const box = el('.reward-box');
     box.appendChild(el('p', { text: r.text }));
-    if (r.img) box.appendChild(UI.imageOrPlaceholder(r.img, '📸'));
-    if (r.type === 'meme' && !r.img) box.appendChild(el('.ph', { text: '😹', style: 'height:160px;border-radius:12px' }));
-    if (r.type === 'pic' && !r.img) box.appendChild(el('.ph', { text: '🥹', style: 'height:160px;border-radius:12px' }));
-    if (r.audio) {
-      const a = el('audio', { src: r.audio, controls: '' });
-      box.appendChild(a);
-    } else if (r.type === 'voice') {
-      box.appendChild(el('p', { text: '(add a voice note in content.js → balloons)', style: 'font-size:.8rem;color:var(--muted)' }));
-    }
+    // exactly one heart per balloon — no reward type pays extra
+    // no emoji anywhere in these pop-ups, and no placeholder tile when there
+    // is no image yet — an empty grey box just reads as broken
+    if (r.img) box.appendChild(el('img.reward-img', { src: r.img, alt: '', loading: 'lazy' }));
+    if (r.audio) box.appendChild(el('audio', { src: r.audio, controls: '' }));
     if (r.type === 'evil') box.querySelector('p').style.color = 'var(--rose-deep)';
-    UI.modal(box, { closeText: 'Nice 👍' });
+    box.appendChild(el('.reward-heart', { text: '+1 heart' }));
+    UI.modal(box, { closeText: 'Nice' });
     BdayAudio.ding();
   }
 });
