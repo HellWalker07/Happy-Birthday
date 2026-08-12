@@ -6,6 +6,8 @@
 const BdayAudio = {
   ctx: null,
   bg: null,
+  track: null,        // the song belonging to the section you're in
+  trackSrc: null,
   muted: false,
   started: false,
 
@@ -37,8 +39,34 @@ const BdayAudio = {
 
   toggleMute() {
     this.muted = !this.muted;
-    if (this.bg) { if (this.muted) this.bg.pause(); else this.bg.play().catch(() => {}); }
+    const bed = this.track || this.bg;
+    if (bed) { if (this.muted) bed.pause(); else bed.play().catch(() => {}); }
     return this.muted;
+  },
+
+  /* ---- per-section music ----
+   * One track at a time. Districts call playTrack on the way in; the router
+   * calls stopTrack on every navigation, so a song never follows you out of
+   * the room it belongs to. Empty paths are a no-op, same as before. */
+  playTrack(src, opts) {
+    if (!src) return;
+    if (this.trackSrc === src && this.track) return;   // already on, don't restart
+    this.stopTrack(true);
+    const o = opts || {};
+    const a = new Audio(src);
+    a.loop = o.loop !== false;
+    a.volume = o.volume == null ? 0.5 : o.volume;
+    this.track = a;
+    this.trackSrc = src;
+    if (this.bg) this.bg.pause();                      // duck the site-wide bed
+    if (!this.muted) a.play().catch(() => {});
+  },
+
+  stopTrack(keepBedPaused) {
+    if (this.track) { this.track.pause(); this.track.currentTime = 0; }
+    this.track = null;
+    this.trackSrc = null;
+    if (!keepBedPaused && this.bg && this.started && !this.muted) this.bg.play().catch(() => {});
   },
 
   // ---- synthesised SFX ----

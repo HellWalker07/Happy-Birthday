@@ -4,6 +4,7 @@
 
 BdayRouter.register('wrapped', function (app) {
   BdayState.markVisited('wrapped');
+  BdayAudio.playTrack(CONTENT.audio && CONTENT.audio.wrapped);
   const w = CONTENT.wrapped;
   const him = CONTENT.him.name;
   const screen = el('.district.wrapped');

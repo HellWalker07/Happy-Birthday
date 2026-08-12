@@ -120,6 +120,9 @@ BdayRouter.register('bdaycity', function (app) {
   /* ---------------- CAKE ---------------- */
   function renderCake() {
     stage.innerHTML = '';
+    // the birthday song runs from the cake screen through the banner that
+    // follows it — the balloon game below stops it again
+    BdayAudio.playTrack(CONTENT.audio && CONTENT.audio.bdaycity);
     stage.appendChild(el('p', { text: c.blowPrompt }));
 
     const cake = el('.cake');
@@ -175,14 +178,18 @@ BdayRouter.register('bdaycity', function (app) {
       an.fftSize = 512;
       src.connect(an);
       const buf = new Uint8Array(an.frequencyBinCount);
-      let cooldown = 0;
+      let cooldown = 0, floor = 0;
       (function loop() {
         if (!document.body.contains(fill)) { stream.getTracks().forEach(t => t.stop()); return; }
         an.getByteFrequencyData(buf);
         let sum = 0; for (let i = 0; i < buf.length; i++) sum += buf[i];
         const vol = sum / buf.length;
+        // The birthday song is coming out of the same speakers the mic hears,
+        // so a fixed threshold would let the music blow the candles out. Track
+        // a slow-moving room level instead and only fire on a spike above it.
+        floor = floor ? floor * 0.98 + vol * 0.02 : vol;
         fill.style.width = Math.min(100, vol * 2.2) + '%';
-        if (vol > 42 && cooldown <= 0) { onBlow(); cooldown = 18; }
+        if (vol > Math.max(42, floor + 20) && cooldown <= 0) { onBlow(); cooldown = 18; }
         if (cooldown > 0) cooldown--;
         requestAnimationFrame(loop);
       })();
@@ -192,7 +199,8 @@ BdayRouter.register('bdaycity', function (app) {
   }
 
   function cakeDone(cake) {
-    BdayAudio.tune();
+    // the synth jingle is the stand-in for a real track — skip it if one plays
+    if (!BdayAudio.track) BdayAudio.tune();
     UI.confetti({ count: 180 });
     cake.classList.add('explode');
     // one heart for blowing the candles out, once ever
@@ -299,6 +307,7 @@ BdayRouter.register('bdaycity', function (app) {
   /* ---------------- BALLOON POP ---------------- */
   function renderBalloons() {
     stage.innerHTML = '';
+    BdayAudio.stopTrack();
     stage.appendChild(el('h2.neon-cyan', { text: c.balloonPrompt }));
     const counter = el('p.balloon-counter');
     stage.appendChild(counter);
