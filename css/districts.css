@@ -1271,6 +1271,9 @@
 .wr-poster.s5 { background-image: url("../assets/img/s5.jpeg"); }
 .wr-poster.s6 { background-image: url("../assets/img/s6.jpeg"); }
 .wr-poster.s7 { background-image: url("../assets/img/s7.jpeg"); }
+.wr-poster.s8 { background-image: url("../assets/img/s8.jpeg"); }
+.wr-poster.s9 { background-image: url("../assets/img/s9.jpeg"); }
+.wr-poster.s10 { background-image: url("../assets/img/s10.jpeg"); }
 
 /* slide 2's photo slots and controls, measured off s2.jpeg */
 /* Slots measured off the artwork. The bottom-left one is printed landscape,
@@ -1306,12 +1309,27 @@
   border-radius: 10px; background: #FCFAF3;
   border: 3px solid #FCFAF3; box-shadow: 0 5px 14px rgba(42,51,38,.3); }
 .wp-mood img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; border-radius: 7px; }
-/* each sits in the lower half of its card, below the caption line */
-.wp-mood.m-hangry  { left: 43.0%; top: 27.5%; width: 13.5%; height: 14.5%; transform: rotate(1.5deg); }
-.wp-mood.m-plan    { left: 24.0%; top: 50.0%; width: 12.5%; height: 16.5%; transform: rotate(-1.5deg); }
-.wp-mood.m-soft    { left: 69.0%; top: 49.0%; width: 14.0%; height: 15.0%; transform: rotate(1.5deg); }
-.wp-mood.m-srs     { left: 29.0%; top: 79.5%; width: 13.0%; height: 12.5%; transform: rotate(-1.5deg); }
-.wp-mood.m-child   { left: 66.0%; top: 78.0%; width: 12.0%; height: 13.5%; transform: rotate(1.5deg); }
+/* Each one fills the dashed box its card prints, measured off the artwork.
+   No rotation: the cards lean a little but the boxes inside them are drawn
+   square on, and a tilt here would only shear once the art is stretched to
+   the window. There is no Hangry slot — that card's photo is the circle the
+   artwork prints in the middle of the page. */
+.wp-mood.m-plan    { left: 10.74%; top: 40.10%; width: 16.70%; height: 16.34%; }
+.wp-mood.m-soft    { left: 73.93%; top: 43.10%; width: 16.99%; height: 15.82%; }
+.wp-mood.m-srs     { left: 16.99%; top: 74.61%; width: 19.73%; height: 15.82%; }
+.wp-mood.m-child   { left: 62.99%; top: 73.11%; width: 17.77%; height: 16.54%; }
+/* held on whoever the mood is about: asleep with the phone, the two of them in
+   front of the flowers, hunched at the laptop, and the tiara shot */
+.wp-mood.m-plan  img { object-position: 32% 72%; }
+/* The soft-boy shot is a wide garden scene with the two of them small and low
+   in it, so `cover` alone fills the box with roof, sky and bush. Its crop is
+   solved per window shape by refocus() in wrapped.js, which writes over these
+   three properties as soon as the photo has decoded — what is left here is only
+   what shows for that first frame, so it holds the couple rather than the sky
+   and never has to fight the inline values. */
+.wp-mood.m-soft  img { object-position: 50.5% 74%; }
+.wp-mood.m-srs   img { object-position: 25% 62%; }
+.wp-mood.m-child img { object-position: 42% 96%; }
 .wp-next.s6 { left: 42.8%; top: 92.6%; width: 14.6%; height: 5.8%; }
 .wr-poster.s6 .wp-back { left: 28.5%; top: 92.6%; height: 5.8%; }
 
@@ -1321,17 +1339,88 @@
 .wp-ph.bare { background: none; border: none; box-shadow: none; }
 .wp-ph.bare .shot { left: 0; right: 0; top: 0; bottom: 0; }
 .wp-ph.s7tr  { left: 70.9%; top: 0%;     width: 14.3%; height: 21.1%; transform: rotate(2deg); }
-.wp-ph.s7adv { left: 54.0%; top: 29.5%;  width: 16.8%; height: 26.0%; transform: rotate(-1.5deg); }
-/* The window is near-square (248x240) but the photo is 0.75, so `cover` alone
-   shows 929 of 1280 rows and leaves her small under a lot of sky. Zoom in on
-   her instead — values picked by rendering candidates side by side. */
-.wp-ph.s7adv img {
-  object-position: 50% 75%;
-  transform: scale(1.9);
-  transform-origin: 56% 82%;
-}
+/* The printed photo window is square on, even though the polaroid frame drawn
+   around it is tilted — so this slot takes no rotation of its own. */
+.wp-ph.s7adv { left: 54.9%; top: 31.0%;  width: 15.8%; height: 23.3%; }
+/* The printed window is square (243x239), so once the artwork stretches to the
+   viewport this box swings from tall and narrow on a phone to wider than high
+   on a laptop — no one crop written here can suit both, and the one that framed
+   her on a phone cut the top of her head off on a laptop. refocus() in
+   wrapped.js solves it against the box's live shape instead; this is only the
+   frame before the photo decodes.
+   `.shot` is in the selector so this outranks the generic `.wp-ph .shot img`
+   below, which sets its own object-position and would otherwise win on order. */
+.wp-ph.s7adv .shot img { object-position: 51% 90%; }
 .wp-next.s7 { left: 41.8%; top: 92.5%; width: 16.6%; height: 5.6%; }
 .wr-poster.s7 .wp-back { left: 27.5%; top: 92.5%; height: 5.6%; }
+
+/* Slide 8 — three printed polaroids, each pinned at its own angle. The prints
+   inside them are not concentric with their cards (the top-left one leans back
+   while its card barely does), so every slot carries the print's own tilt, not
+   the card's, and drops the photo straight into the print (`bare`). */
+.wp-ph.s8tl { left: 4.08%;  top: 6.56%;  width: 18.15%; height: 22.65%; transform: rotate(-10.23deg); }
+.wp-ph.s8tr { left: 79.97%; top: 6.63%;  width: 16.09%; height: 22.38%; transform: rotate(8.54deg); }
+.wp-ph.s8br { left: 80.33%; top: 65.63%; width: 14.78%; height: 21.50%; transform: rotate(13.63deg); }
+/* `.shot` in each selector so these outrank the generic `.wp-ph .shot img`
+   further down, which sets its own object-position and would win on order */
+.wp-ph.s8tl .shot img { object-position: 48% 45%; }
+/* a tall shot of the two of them on a ledge: framed on the pair of them from
+   just above their heads down to the flower in their hands, so the crop ends
+   at their laps rather than running all the way down to their shoes */
+.wp-ph.s8tr .shot img {
+  object-position: 50% 32%;
+  transform: scale(1.52);
+  transform-origin: 55% 50%;
+}
+/* the third photo is a wide street shot with the two of them small and far
+   down it, so this one zooms from the bottom edge to bring them up */
+.wp-ph.s8br .shot img {
+  object-position: 50% 100%;
+  transform: scale(1.5);
+  transform-origin: 48% 100%;
+}
+/* The tape and stickers are painted into the artwork, so a photo dropped into
+   a print buries them. This lays the artwork back over the top, masked to just
+   those shapes — identical pixels, so it shows nowhere except where it falls on
+   a photo, which reads as the photo being tucked under them. The mask is a
+   silhouette cut from the artwork itself (torn edges and all), sized like the
+   background so the two always line up. */
+.wp-over {
+  inset: 0; z-index: 3; background: inherit; pointer-events: none;
+  -webkit-mask: url("../assets/img/s8-stickers.png") center / 100% 100% no-repeat;
+  mask: url("../assets/img/s8-stickers.png") center / 100% 100% no-repeat;
+}
+
+/* a shade wider than the printed pill so none of it shows around the edge */
+.wp-next.s8 { left: 43.3%; top: 94.4%; width: 12.7%; height: 4.5%; }
+.wr-poster.s8 .wp-back { left: 30.0%; top: 94.4%; height: 4.5%; width: 11.5%; }
+
+/* Slide 9 — the personality pie, with one polaroid taped up beside it.
+   Measured rather than eyeballed: rays walked out from inside each printed
+   window until they reach the cream of the frame, then a rectangle fitted to
+   where they stopped. The top edge of each of these windows wears a strip of
+   washi tape, which stops those rays early, so the top comes from the rays
+   that carry past it — the photo laps under the tape rather than stopping at
+   it and leaving a band of the artwork's own printed photo on show. */
+.wp-ph.s9tr { left: 64.35%; top: 15.08%; width: 27.75%; height: 35.72%; transform: rotate(3.99deg); }
+/* Unlike the earlier artworks this one prints no pill for the controls, so they
+   sit on the empty green band at the foot of the page, either side of the
+   printed dots. */
+.wp-next.s9 { left: 61.5%; top: 92.4%; width: 15%; height: 5.6%; }
+.wr-poster.s9 .wp-back { left: 24.0%; top: 92.4%; height: 5.6%; width: 12.5%; }
+
+/* Slide 10 — two printed polaroids, both `bare`: the artwork draws the white
+   frame and the deep bottom lip, so the photo drops into the print itself.
+   Each carries its print's own tilt, which unstretchTilts() re-expresses for
+   the window's shape. Measured off the artwork at 1024x818. */
+/* Both measured the same way as slide 9's. The left print carries the stronger
+   tilt of the two and runs off the page edge. */
+.wp-ph.s10tl { left: 0.77%;  top: 5.77%;  width: 22.72%; height: 28.35%; transform: rotate(-13.48deg); }
+.wp-ph.s10tr { left: 77.80%; top: 10.44%; width: 20.38%; height: 29.01%; transform: rotate(10.69deg); }
+/* the foot of this artwork is busier — the note, the teddy and the cup all run
+   low — so the controls take the last strip under them */
+.wp-next.s10 { left: 60.0%; top: 95.3%; width: 14%; height: 4%; }
+.wr-poster.s10 .wp-back { left: 26.0%; top: 95.3%; height: 4%; width: 12%; }
 .wp-back {
   left: 25.5%; top: 92.2%; height: 6.4%; width: 13%;
   border-radius: 999px; background: rgba(251,246,236,.92); color: #56704A;

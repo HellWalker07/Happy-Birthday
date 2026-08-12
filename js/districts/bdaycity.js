@@ -352,7 +352,14 @@ BdayRouter.register('bdaycity', function (app) {
     // no emoji anywhere in these pop-ups, and no placeholder tile when there
     // is no image yet — an empty grey box just reads as broken
     if (r.img) box.appendChild(el('img.reward-img', { src: r.img, alt: '', loading: 'lazy' }));
-    if (r.audio) box.appendChild(el('audio', { src: r.audio, controls: '' }));
+    // a voice note starts itself — the pop that opened this counts as the tap
+    // browsers want before audio may play. Controls stay for a replay, and
+    // closing the modal takes the element out of the document, which stops it.
+    if (r.audio) {
+      const a = el('audio', { src: r.audio, controls: '', autoplay: '' });
+      box.appendChild(a);
+      if (!BdayAudio.muted) a.play().catch(() => {});
+    }
     if (r.type === 'evil') box.querySelector('p').style.color = 'var(--rose-deep)';
     box.appendChild(el('.reward-heart', { text: '+1 heart' }));
     UI.modal(box, { closeText: 'Nice' });
