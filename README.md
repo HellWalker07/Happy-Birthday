@@ -66,7 +66,7 @@ Progress + hearts are saved in his browser, so he can leave and come back. (Tiny
 ## 🎮 The districts
 1. **Bday City** — blow out candles (breath or tap) → cake explodes into a message → balloon-pop game with hidden rewards.
 2. **Memory Lane** — flip-over polaroid wall, live photobooth (earns a heart), Netflix-style memories.
-3. **Arcade** — find 6 hats, spot 8 differences, escape room with 3 riddles.
+3. **Arcade** — find 10 hats, escape room with 3 riddles.
 4. **Open-When Letters** — envelopes that open to your notes.
 5. **Wrapped** — Spotify-Wrapped-style story cards + a Blend.
 6. **Merch Store** — spend hearts, cart + checkout, "Confirm purchase?" gag, printed receipt.

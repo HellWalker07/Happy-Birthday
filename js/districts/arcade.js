@@ -15,6 +15,8 @@ BdayRouter.register('arcade', function (app) {
 
   // `diff` (Spot 8 Differences) is parked — see the commented block below.
   const games = { hats: false, escape: false };
+  // every place that says how many hats there are reads this one number
+  const hatCount = (a.hats && a.hats.count) || 10;
   function checkDone() {
     if (games.hats && games.escape && !BdayState.isComplete('arcade')) {
       BdayState.markComplete('arcade');
@@ -36,7 +38,7 @@ BdayRouter.register('arcade', function (app) {
 
     const cards = el('.ar-cards');
     [
-      { id: 'hats',   icon: 'tophat', name: 'Find 6 Hats',  sticker: 'heart', go: gameHats },
+      { id: 'hats',   icon: 'tophat', name: 'Find ' + hatCount + ' Hats',  sticker: 'heart', go: gameHats },
       // { id: 'diff', icon: 'magnifier', name: 'Spot 8 Differences', sticker: 'star', go: gameDiff },
       { id: 'escape', icon: 'door',   name: 'Escape Room',  sticker: 'heart', go: gameEscape },
     ].forEach((gm, i) => {
@@ -105,14 +107,14 @@ BdayRouter.register('arcade', function (app) {
     }
   }
 
-  /* ---------- FIND 6 HATS ---------- */
+  /* ---------- FIND THE HATS ---------- */
   function gameHats() {
     wrap.innerHTML = '';
     wrap.classList.remove('ar-menu');
     wrap.appendChild(backRow(renderMenu));
-    wrap.appendChild(el('.hat-title', { text: '✧ ' + (a.hatsTitle || 'Find the 6 Birthday Hats') }));
+    wrap.appendChild(el('.hat-title', { text: '✧ ' + (a.hatsTitle || 'Find the ' + hatCount + ' Birthday Hats') }));
     wrap.appendChild(el('.hat-sub', { text: a.hatsSub || "They're hiding… can you spot them all?" }));
-    const counter = el('.hat-count', { text: `0 / ${a.hats.count}` });
+    const counter = el('.hat-count', { text: `0 / ${hatCount}` });
     wrap.appendChild(counter);
 
     const room = el('.hat-room');
@@ -123,7 +125,7 @@ BdayRouter.register('arcade', function (app) {
       place(d); room.appendChild(d);
     }
     let found = 0;
-    for (let i = 0; i < a.hats.count; i++) {
+    for (let i = 0; i < hatCount; i++) {
       const hat = el('span.hat', { html: BW_DOODLE.tophat(true) });   // camouflaged
       place(hat);
       hat.addEventListener('click', (e) => {
@@ -132,12 +134,12 @@ BdayRouter.register('arcade', function (app) {
         hat.classList.add('found');
         BdayAudio.pop();
         found++;
-        counter.textContent = `${found} / ${a.hats.count}`;
+        counter.textContent = `${found} / ${hatCount}`;
         // a heart per hat, but only up to `count` ever — replays pay nothing
-        if (BdayState.claim('arcade:hats', a.hats.count)) BdayState.awardHearts(1);
+        if (BdayState.claim('arcade:hats', hatCount)) BdayState.awardHearts(1);
         const r = hat.getBoundingClientRect();
         UI.confetti({ count: 16, x: r.left + 10, y: r.top + 10 });
-        if (found >= a.hats.count) {
+        if (found >= hatCount) {
           award('hats', 'All hats found!', 0);   // …and nothing extra for finishing
           setTimeout(renderMenu, 1100);
         }
