@@ -105,12 +105,7 @@ BdayRouter.register('wrapped', function (app) {
     nav.appendChild(el('.wr-page', { text: (idx + 1) + ' / ' + cards.length }));
     if (idx > 0) nav.appendChild(el('button.btn.ghost', { text: '‹ Back', onclick: () => { idx--; BdayAudio.pop(); renderCard(); } }));
     if (idx < cards.length - 1) nav.appendChild(el('button.btn', { text: 'Next ›', onclick: () => { idx++; BdayAudio.pop(); renderCard(); } }));
-    else nav.appendChild(el('button.btn', {
-      text: 'Done ✨', onclick: () => {
-        if (!BdayState.isComplete('wrapped')) { BdayState.markComplete('wrapped'); BdayState.awardHearts(1); UI.confetti(); UI.toast('Wrapped complete! +1 ❤️'); }
-        BdayRouter.go('map');
-      }
-    }));
+    else nav.appendChild(el('button.btn', { text: 'Done ✨', onclick: finish }));
     stageWrap.appendChild(nav);
     stageWrap.appendChild(buildScraps());
 
@@ -119,6 +114,18 @@ BdayRouter.register('wrapped', function (app) {
 
     // smooth cascade of this card's contents each time it changes
     UI.reveal(c);
+  }
+
+  /* The end of the deck, wherever it is reached from — the last plain card or
+   * the last artwork, which both hand off to it */
+  function finish() {
+    if (!BdayState.isComplete('wrapped')) {
+      BdayState.markComplete('wrapped');
+      BdayState.awardHearts(1);
+      UI.confetti();
+      UI.toast('Wrapped complete! +1 ❤️');
+    }
+    BdayRouter.go('map');
   }
 
   /* Slide 1 is the reference artwork itself, with the live card text, your two
@@ -160,7 +167,8 @@ BdayRouter.register('wrapped', function (app) {
    *   key   — deck index
    *   art   — modifier class carrying the background image
    *   from  — which content.js photo set to read
-   *   slots — [content key, slot class] pairs, measured off that artwork
+   *   slots — [content key, slot class, focus?] triples, measured off that
+   *           artwork; `focus` is described at refocus() below
    */
   const ART_SLIDES = {
     1: { art: 's2', from: 'photos2',
@@ -173,12 +181,89 @@ BdayRouter.register('wrapped', function (app) {
          slots: [['topRight', 's5tr'], ['bottomLeft', 's5bl']] },
     // slide 6's moods are cut-outs, so they take the .wp-mood treatment
     5: { art: 's6', from: 'photos6', mood: true,
-         slots: [['hangry', 'm-hangry'], ['plan', 'm-plan'], ['soft', 'm-soft'],
+         // the soft-boy shot is a wide garden scene with the two of them small
+         // and low in it, so the box has to be held on the pair
+         slots: [['plan', 'm-plan'], ['soft', 'm-soft', [.20, .45, .80, 1]],
                  ['srs', 'm-srs'], ['child', 'm-child']] },
     // `bare` on the Advika slot so the artwork's caption stays visible
     6: { art: 's7', from: 'photos7',
-         slots: [['topRight', 's7tr'], ['artist', 's7adv.bare']] },
+         // held on her face — this print is square, so its box swings from tall
+         // and narrow on a phone to wider than high on a laptop
+         slots: [['topRight', 's7tr'], ['artist', 's7adv.bare', [.40, .55, .60, .75]]] },
+    // slide 8's three polaroids are all `bare`: each printed frame is drawn at
+    // its own angle, so the photo drops into the print itself rather than
+    // wearing a second frame on top of the first
+    7: { art: 's8', from: 'photos8', ar: 1448 / 1086,
+         slots: [['topLeft', 's8tl.bare'], ['topRight', 's8tr.bare'],
+                 ['bottomRight', 's8br.bare']],
+         over: true },
+    8: { art: 's9', from: 'photos9', ar: 1024 / 717,
+         // held on him at the table, so the cakes and the banner come along
+         slots: [['topRight', 's9tr.bare', [.14, .30, .56, .60]]] },
+    9: { art: 's10', from: 'photos10', ar: 1024 / 818,
+         // both prints are near enough square, so each photo is held on the two
+         // of them rather than left to `cover`
+         slots: [['topLeft', 's10tl.bare', [.32, .37, .74, .58]],
+                 ['topRight', 's10tr.bare', [.28, .27, .72, .58]]] },
   };
+
+  /* The artwork is stretched to fill the window, and a rotated rectangle does
+   * not survive a non-uniform stretch — its corners shear. On a phone a 13°
+   * printed tilt lands at 5° across and 35° down, so no plain rotation can sit
+   * on it. Given the artwork's own aspect (`ar` on the slide), rebuild each
+   * tilt as the matrix that the stretch turns back into the printed angle.
+   * The CSS keeps holding the printed angles; this only re-expresses them. */
+  function unstretchTilts(poster, ar) {
+    const k = (window.innerWidth / window.innerHeight) / ar;
+    poster.querySelectorAll('.wp-ph, .wp-mood').forEach(el => {
+      if (el.dataset.tilt === undefined) {
+        const m = new DOMMatrix(getComputedStyle(el).transform);
+        el.dataset.tilt = Math.atan2(m.b, m.a);
+      }
+      const th = +el.dataset.tilt;
+      if (!th) return;
+      const c = Math.cos(th), s = Math.sin(th);
+      el.style.transform = `matrix(${c}, ${s / k}, ${-s * k}, ${c}, 0, 0)`;
+    });
+  }
+
+  /* A slot changes shape with the window. The artwork is stretched to fill the
+   * viewport, so the same printed polaroid is tall and narrow on a phone and
+   * wider than it is high on a laptop — and one crop written in CSS cannot suit
+   * both: tuned for the phone it slices the top of a head off on the laptop.
+   *
+   * `focus` names the part of the photo that has to stay in frame, as
+   * [x0, y0, x1, y1] fractions of the source. This solves, for the shape the
+   * box has right now, the object-position and zoom that keep exactly that part
+   * visible and fill the rest of the box with whatever surrounds it. The two
+   * are set to the same point on purpose: the pixel at object-position is the
+   * one that lands at the matching point of the box whatever the shape, so it
+   * is also the one to zoom around. Where the box is too wide to hold the whole
+   * region, it keeps the top of it — in a photo of people, that is the faces. */
+  function refocus(img, roi) {
+    const sw = img.naturalWidth, sh = img.naturalHeight;
+    const W = img.offsetWidth, H = img.offsetHeight;
+    if (!sw || !W) return;
+    const rx = roi[0] * sw, ry = roi[1] * sh;
+    const rw = roi[2] * sw - rx, rh = roi[3] * sh - ry;
+    const ar = W / H;
+    // smallest window of the box's shape that still holds the whole region
+    let cw = Math.max(rw, rh * ar), ch = cw / ar;
+    if (cw > sw) { cw = sw; ch = cw / ar; }
+    if (ch > sh) { ch = sh; cw = ch * ar; }
+    let left = rx + rw / 2 - cw / 2;
+    let top = ch < rh ? ry : ry + rh / 2 - ch / 2;
+    left = Math.max(0, Math.min(left, sw - cw));
+    top = Math.max(0, Math.min(top, sh - ch));
+    // object-position is a fraction of the slack, which is what makes this the
+    // window's own offset divided by how far it is free to travel
+    const px = sw - cw > .5 ? left / (sw - cw) : .5;
+    const py = sh - ch > .5 ? top / (sh - ch) : .5;
+    const at = (px * 100).toFixed(2) + '% ' + (py * 100).toFixed(2) + '%';
+    img.style.objectPosition = at;
+    img.style.transformOrigin = at;
+    img.style.transform = 'scale(' + (W / Math.max(W / sw, H / sh) / cw).toFixed(3) + ')';
+  }
 
   function renderArtSlide(cfg) {
     const P = w[cfg.from] || {};
@@ -186,23 +271,47 @@ BdayRouter.register('wrapped', function (app) {
     const poster = el('.wr-poster.' + cfg.art);
     wrap.appendChild(poster);
 
-    cfg.slots.forEach(([key, slot]) => {
+    const held = [];   // [img, focus] pairs to keep framed as the box reshapes
+    cfg.slots.forEach(([key, slot, focus]) => {
       if (!P[key]) return;
+      const img = el('img', { src: P[key], alt: '' });
       poster.appendChild(cfg.mood
-        ? el('.wp-mood.' + slot, {}, el('img', { src: P[key], alt: '' }))
-        : el('.wp-ph.' + slot, {}, el('.shot', {}, el('img', { src: P[key], alt: '' }))));
+        ? el('.wp-mood.' + slot, {}, img)
+        : el('.wp-ph.' + slot, {}, el('.shot', {}, img)));
+      if (focus) held.push([img, focus]);
     });
+
+    // the tape and stickers are printed into the artwork, so a photo dropped
+    // into a polaroid buries them; this lays the same artwork back over the
+    // top, masked to those shapes, which puts the photo under them again
+    if (cfg.over) poster.appendChild(el('.wp-over'));
 
     poster.appendChild(el('button.wp-back', {
       text: '‹  Back',
       onclick: () => { idx--; BdayAudio.pop(); renderCard(); },
     }));
+    // the deck now ends on an artwork, so that slide's button is the Done one
+    const last = idx === cards.length - 1;
     poster.appendChild(el('button.wp-next.' + cfg.art, {
-      text: 'Next  ›',
-      onclick: () => { idx++; BdayAudio.pop(); renderCard(); },
+      text: last ? 'Done  ✨' : 'Next  ›',
+      onclick: last ? finish : () => { idx++; BdayAudio.pop(); renderCard(); },
     }));
 
     stageWrap.appendChild(wrap);
+    if (cfg.ar || held.length) {
+      const fix = () => {
+        if (cfg.ar) unstretchTilts(poster, cfg.ar);
+        held.forEach(([img, focus]) => refocus(img, focus));
+      };
+      fix();
+      // a photo still decoding has no size to measure yet, so frame it on arrival
+      held.forEach(([img]) => { if (!img.complete) img.addEventListener('load', fix); });
+      window.addEventListener('resize', fix);
+      // the stage is emptied on every slide change, so drop the listener with it
+      new MutationObserver((_, o) => {
+        if (!poster.isConnected) { window.removeEventListener('resize', fix); o.disconnect(); }
+      }).observe(stageWrap, { childList: true });
+    }
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 

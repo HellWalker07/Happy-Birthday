@@ -137,7 +137,7 @@ window.CONTENT = {
     balloons: [
       { type: "fact",   text: "Secret fact: your eyes twinkle when you are excited" },
       { type: "fact",   text: "Secret fact: You have always liked me, you just didn't know" },
-      { type: "meme",   text: "To friend:\n\nIdhar chalte hai khane\n\n(Kisi ka nahi bas uska man hai)", img: "" /* TODO: meme image from chat */ },
+      { type: "voice",  text: "Bear with this voice", audio: "assets/audio/balloon.ogg" },
       { type: "meme",   text: "Meme Unlocked!!!", img: "assets/img/pop3.jpeg" },
       { type: "pic",    text: "Look at this photo", img: "assets/img/pop2.jpeg" },
       { type: "coupon", text: "Coupon: One free hug, redeemable anytime." },
@@ -281,9 +281,26 @@ window.CONTENT = {
       topRight: "assets/img/s7 1.jpeg",
       artist:   "assets/img/advika.jpeg",
     },
-    // slide 6 — one photo per mood card
+    // slide 8 — three printed polaroids. The top-left one is the widest, so it
+    // takes the only landscape photo of the three.
+    photos8: {
+      topLeft:     "assets/img/s8 2.jpeg",
+      topRight:    "assets/img/s8 1.jpeg",
+      bottomRight: "assets/img/s8 3.jpeg",
+    },
+    // slide 9 — the one polaroid taped up beside the pie chart
+    photos9: {
+      topRight: "assets/img/s9 1.jpeg",
+    },
+    // slide 10 — two printed polaroids. The right-hand print is the taller of
+    // the two, so it takes the taller photo.
+    photos10: {
+      topLeft:  "assets/img/s10 2.jpeg",
+      topRight: "assets/img/s10 1.jpeg",
+    },
+    // slide 6 — one photo per mood card. The Hangry card has no entry: its
+    // photo window is the circle the artwork already prints in the middle.
     photos6: {
-      hangry: "assets/img/hangry.jpeg",
       plan:   "assets/img/plan.jpeg",
       soft:   "assets/img/soft boy.jpeg",
       srs:    "assets/img/srs.jpeg",
