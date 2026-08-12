@@ -4,6 +4,7 @@
 
 BdayRouter.register('gallery', function (app) {
   BdayState.markVisited('gallery');
+  BdayAudio.playTrack(CONTENT.audio && CONTENT.audio.gallery);
   const g = CONTENT.gallery;
   const screen = el('.district.gallery');
   screen.appendChild(districtHead('Memory Lane 📸'));

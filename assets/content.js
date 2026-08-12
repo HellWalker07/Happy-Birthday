@@ -389,9 +389,10 @@ window.CONTENT = {
     bgMusic: "",                    // optional site-wide bed
 
     // per-district tracks
-    wrapped:  "assets/audio/wrapped.mp3",   // loops for the whole Wrapped story
-    arcade:   "assets/audio/arcade.mp3",    // loops across the whole Arcade district
-    bdaycity: "assets/audio/candles.mp3",   // the cake screen — blowing the candles out
-    letters:  "assets/audio/open-when.mp3", // loops through the Open-When Letters
+    wrapped:  "assets/audio/wrapped.mp3",     // loops for the whole Wrapped story
+    arcade:   "assets/audio/arcade.mp3",      // loops across the whole Arcade district
+    bdaycity: "assets/audio/candles.mp3",     // the cake screen — blowing the candles out
+    letters:  "assets/audio/open-when.mp3",   // loops through the Open-When Letters
+    gallery:  "assets/audio/memory-lane.mp3", // loops across all of Memory Lane
   },
 };
