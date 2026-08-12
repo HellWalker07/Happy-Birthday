@@ -20,6 +20,7 @@ const BdayRouter = {
   go(id, opts) {
     const app = document.getElementById('app');
     UI.closeModal();
+    BdayAudio.stopTrack();   // section music never outlives its section
     app.innerHTML = '';
     app.scrollTop = 0;
     window.scrollTo(0, 0);

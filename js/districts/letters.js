@@ -8,6 +8,7 @@
 
 BdayRouter.register('letters', function (app) {
   BdayState.markVisited('letters');
+  BdayAudio.playTrack(CONTENT.audio && CONTENT.audio.letters);
   const c = CONTENT.letters_page || {};
   const letters = CONTENT.letters || [];
   const screen = el('.district.letters');

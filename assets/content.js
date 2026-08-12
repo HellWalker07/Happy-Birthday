@@ -383,15 +383,15 @@ window.CONTENT = {
   },
 
   /* -------- AUDIO --------
-   * ⬇ PLACEHOLDERS — drop the mp3s into assets/audio/ and fill in the paths.
-   * Nothing breaks while these are empty; each track simply doesn't play. */
+   * Each track loops for as long as you're in its section and stops on the way
+   * out. Leave a path empty and that section simply plays no music. */
   audio: {
     bgMusic: "",                    // optional site-wide bed
 
-    // per-district tracks requested in the brief
-    wrapped:  "",  // TODO: "Locha-E-Ulfat" (2 States) — loops for the whole Wrapped story
-    arcade:   "",  // TODO: a chiptune / Mario-style loop, starts when a game is picked
-    bdaycity: "",  // TODO: "Happy Birthday" — fires when the candles are blown out
-    letters:  "",  // TODO: "Zehnaseeb" (Hasee Toh Phasee) — plays in Open-When Letters
+    // per-district tracks
+    wrapped:  "assets/audio/wrapped.mp3",   // loops for the whole Wrapped story
+    arcade:   "assets/audio/arcade.mp3",    // loops across the whole Arcade district
+    bdaycity: "assets/audio/candles.mp3",   // the cake screen — blowing the candles out
+    letters:  "assets/audio/open-when.mp3", // loops through the Open-When Letters
   },
 };

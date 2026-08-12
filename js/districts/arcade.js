@@ -4,6 +4,7 @@
 
 BdayRouter.register('arcade', function (app) {
   BdayState.markVisited('arcade');
+  BdayAudio.playTrack(CONTENT.audio && CONTENT.audio.arcade);
   const a = CONTENT.arcade;
   const screen = el('.district.arcade');
   screen.appendChild(districtHead('Arcade District 🕹️'));
