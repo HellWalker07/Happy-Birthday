@@ -298,10 +298,11 @@ window.CONTENT = {
       topLeft:  "assets/img/s10 2.jpeg",
       topRight: "assets/img/s10 1.jpeg",
     },
-    // slide 6 — one photo per mood card. The Hangry card has no entry: its
-    // photo window is the circle the artwork already prints in the middle.
+    // slide 6 — one photo per mood card, five in all. The circle in the middle
+    // of the artwork is already printed with a photo, so it takes no entry.
     photos6: {
       plan:   "assets/img/plan.jpeg",
+      hangry: "assets/img/hangry.jpeg",
       soft:   "assets/img/soft boy.jpeg",
       srs:    "assets/img/srs.jpeg",
       child:  "assets/img/child.jpeg",
