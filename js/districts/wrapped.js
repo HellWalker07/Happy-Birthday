@@ -180,12 +180,22 @@ BdayRouter.register('wrapped', function (app) {
          slots: [['topLeft', 's4tl'], ['right', 's4r']] },
     4: { art: 's5', from: 'photos5',
          slots: [['topRight', 's5tr'], ['bottomLeft', 's5bl']] },
-    // slide 6's moods are cut-outs, so they take the .wp-mood treatment
+    // Slide 6's moods are dashed boxes printed on the mood cards, so they take
+    // the .wp-mood treatment. Every one of them is landscape and every photo
+    // supplied is portrait, so `cover` alone would drop between a third and two
+    // thirds of each photo's height and take faces with it — each slot names
+    // what has to survive the crop instead:
+    //   plan   — asleep with the phone still in hand
+    //   hangry — his face and the food, which sit right of centre
+    //   soft   — a wide garden scene, so it holds the two of them, not the sky
+    //   srs    — him hunched at the laptop, both ends of that kept in frame
+    //   child  — the tiara down to the phone he is watching
     5: { art: 's6', from: 'photos6', mood: true,
-         // the soft-boy shot is a wide garden scene with the two of them small
-         // and low in it, so the box has to be held on the pair
-         slots: [['plan', 'm-plan'], ['soft', 'm-soft', [.20, .45, .80, 1]],
-                 ['srs', 'm-srs'], ['child', 'm-child']] },
+         slots: [['plan',   'm-plan',   [.05, .43, .60, .72]],
+                 ['hangry', 'm-hangry', [.50, .24, .95, .62]],
+                 ['soft',   'm-soft',   [.20, .48, .78, .80]],
+                 ['srs',    'm-srs',    [.02, .48, .82, .76]],
+                 ['child',  'm-child',  [.20, .53, .85, .95]]] },
     // `bare` on the Advika slot so the artwork's caption stays visible
     6: { art: 's7', from: 'photos7',
          // held on her face — this print is square, so its box swings from tall
