@@ -190,12 +190,17 @@ BdayRouter.register('wrapped', function (app) {
     //   soft   — a wide garden scene, so it holds the two of them, not the sky
     //   srs    — him hunched at the laptop, both ends of that kept in frame
     //   child  — the tiara down to the phone he is watching
+    //   centre — him at the table. Kept narrow on purpose: the round window is
+    //            the tallest slot on the sheet, so on a tall phone it stretches
+    //            to a slit, and a wide region would have to zoom out to fit and
+    //            leave the corners of the circle bare
     5: { art: 's6', from: 'photos6', mood: true,
          slots: [['plan',   'm-plan',   [.05, .43, .60, .72]],
                  ['hangry', 'm-hangry', [.50, .24, .95, .62]],
                  ['soft',   'm-soft',   [.20, .48, .78, .80]],
                  ['srs',    'm-srs',    [.02, .48, .82, .76]],
-                 ['child',  'm-child',  [.20, .53, .85, .95]]] },
+                 ['child',  'm-child',  [.20, .53, .85, .95]],
+                 ['centre', 'm-centre', [.41, .29, .65, .70]]] },
     // `bare` on the Advika slot so the artwork's caption stays visible
     6: { art: 's7', from: 'photos7',
          // held on her face — this print is square, so its box swings from tall
