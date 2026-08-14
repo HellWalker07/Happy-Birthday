@@ -298,14 +298,15 @@ window.CONTENT = {
       topLeft:  "assets/img/s10 2.jpeg",
       topRight: "assets/img/s10 1.jpeg",
     },
-    // slide 6 — one photo per mood card, five in all. The circle in the middle
-    // of the artwork is already printed with a photo, so it takes no entry.
+    // slide 6 — one photo per mood card, plus the round one in the middle of
+    // the sheet, which drops over the photo the artwork prints there.
     photos6: {
       plan:   "assets/img/plan.jpeg",
       hangry: "assets/img/hangry.jpeg",
       soft:   "assets/img/soft boy.jpeg",
       srs:    "assets/img/srs.jpeg",
       child:  "assets/img/child.jpeg",
+      centre: "assets/img/s6 c.jpeg",
     },
     note1: ["little", "moments,", "big", "memories ♡"],
     note2: ["you + me", "= magic ♡"],

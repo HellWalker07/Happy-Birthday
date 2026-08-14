@@ -1311,15 +1311,25 @@
   border: 3px solid #FCFAF3; box-shadow: 0 5px 14px rgba(42,51,38,.3); }
 .wp-mood img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 45%; border-radius: 7px; }
 /* Each one fills the dashed box its card prints, measured off s6.png at
-   1535x1024 by growing a rectangle out from inside each box until the kraft
-   fill gives way to the card stock around it. No rotation: the cards lean a
-   little but the boxes drawn inside them are square on. The circle in the
-   middle of the page takes no slot — it is printed with a photo already. */
-.wp-mood.m-plan   { left: 10.29%; top: 46.39%; width: 15.37%; height: 16.31%; }
-.wp-mood.m-hangry { left: 40.39%; top: 33.20%; width: 18.24%; height: 13.57%; }
-.wp-mood.m-soft   { left: 75.05%; top: 48.34%; width: 15.57%; height: 14.65%; }
-.wp-mood.m-srs    { left: 19.35%; top: 81.93%; width: 13.03%; height: 12.50%; }
-.wp-mood.m-child  { left: 64.89%; top: 80.57%; width: 11.92%; height: 13.87%; }
+   1672x941 by flooding the kraft fill out from inside each box until it gives
+   way to the card stock around it, which reads the boxes back whatever the
+   sheet is re-exported at. No rotation: the cards lean a little but the boxes
+   drawn inside them are square on. */
+.wp-mood.m-plan   { left: 10.29%; top: 47.82%; width: 13.76%; height: 15.30%; }
+.wp-mood.m-hangry { left: 39.17%; top: 37.30%; width: 18.24%; height: 11.58%; }
+.wp-mood.m-soft   { left: 74.52%; top: 49.52%; width: 16.09%; height: 14.98%; }
+.wp-mood.m-srs    { left: 19.02%; top: 84.27%; width: 11.90%; height: 11.69%; }
+.wp-mood.m-child  { left: 66.15%; top: 82.25%; width: 11.18%; height: 13.39%; }
+/* The round window in the middle comes printed with a photo of its own, so
+   this one covers rather than fills: traced off the artwork by casting rays
+   from the centre until they reach the white ring, then carried two pixels
+   past it so nothing of the printed photo can show around the edge. It is
+   drawn a little taller than it is wide, and matching that beats forcing a
+   true circle — the cream border then lands on the ring instead of inside it.
+   No shadow of its own: the artwork already rings it twice. */
+.wp-mood.m-centre { left: 40.07%; top: 51.01%; width: 17.88%; height: 33.79%;
+  border-radius: 50%; box-shadow: none; }
+.wp-mood.m-centre img { border-radius: 50%; }
 /* Every printed box is landscape and every photo is portrait, so each crop is
    solved per window shape by refocus() in wrapped.js, which writes over these
    three properties as soon as the photo has decoded. What is left here is only
@@ -1330,12 +1340,13 @@
 .wp-mood.m-soft   img { object-position: 49% 64%; }
 .wp-mood.m-srs    img { object-position: 42% 62%; }
 .wp-mood.m-child  img { object-position: 52% 74%; }
-/* This sheet prints no pill for the controls. What it does print, under the
-   "Mood Wrapped" label, is a double-headed arrow — so the two controls take
-   its two ends and leave the arrow itself showing between them, in the gap
-   between the two bottom cards. */
-.wr-poster.s6 .wp-back { left: 34.0%; top: 91.6%; width: 11.0%; height: 5.4%; }
-.wp-next.s6            { left: 53.5%; top: 91.6%; width: 11.0%; height: 5.4%; }
+/* This sheet prints no pill for the controls, so the two of them flank the
+   "Mood Wrapped" label at the foot of the page — Back on the blank right end
+   of the Serious Face card, Next on the blank left end of the Child one, each
+   reaching into the wallpaper between. Everything else down there is either a
+   photo box or the label itself. */
+.wr-poster.s6 .wp-back { left: 32.6%; top: 90.9%; width: 10.0%; height: 5.3%; }
+.wp-next.s6            { left: 55.5%; top: 90.9%; width: 10.0%; height: 5.3%; }
 /* the gap between those two cards is all the width there is, and on a phone it
    comes to about forty pixels — so these two carry a smaller label than the
    printed pills elsewhere get, and never break it across two lines */
